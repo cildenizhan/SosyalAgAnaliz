@@ -1,73 +1,46 @@
 using SocialNetworkAnalysis.Models;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SocialNetworkAnalysis.Services
 {
-    public class GraphService : IGraphService
+    public class GraphService
     {
-        
-        private Dictionary<int, UserNode> _nodes;
-        private List<Edge> _edges;
+         
+        public Dictionary<int, UserNode> Nodes { get; private set; }
+        public List<Edge> Edges { get; private set; }
 
         public GraphService()
         {
-            _nodes = new Dictionary<int, UserNode>();
-            _edges = new List<Edge>();
+            Nodes = new Dictionary<int, UserNode>();
+            Edges = new List<Edge>();
         }
 
         public void AddNode(UserNode node)
         {
-            if (!_nodes.ContainsKey(node.Id))
+            if (!Nodes.ContainsKey(node.Id))
             {
-                _nodes.Add(node.Id, node);
-            }
-        }
-
-        public void RemoveNode(int nodeId)
-        {
-            if (_nodes.ContainsKey(nodeId))
-            {
-                
-                _edges.RemoveAll(e => e.Source.Id == nodeId || e.Target.Id == nodeId);
-                _nodes.Remove(nodeId);
+                Nodes.Add(node.Id, node);
             }
         }
 
         public void AddEdge(int sourceId, int targetId)
         {
-            if (_nodes.ContainsKey(sourceId) && _nodes.ContainsKey(targetId))
+            if (Nodes.ContainsKey(sourceId) && Nodes.ContainsKey(targetId))
             {
-                
-                var source = _nodes[sourceId];
-                var target = _nodes[targetId];
+                var source = Nodes[sourceId];
+                var target = Nodes[targetId];
 
                 
-                bool exists = _edges.Any(e => 
+                bool exists = Edges.Any(e => 
                     (e.Source.Id == sourceId && e.Target.Id == targetId) || 
                     (e.Source.Id == targetId && e.Target.Id == sourceId));
 
                 if (!exists)
                 {
-                    _edges.Add(new Edge(source, target));
+                    Edges.Add(new Edge(source, target));
                 }
             }
-        }
-
-        public void RemoveEdge(int sourceId, int targetId)
-        {
-             _edges.RemoveAll(e => 
-                    (e.Source.Id == sourceId && e.Target.Id == targetId) || 
-                    (e.Source.Id == targetId && e.Target.Id == sourceId));
-        }
-
-        public List<UserNode> GetAllNodes() => _nodes.Values.ToList();
-        public List<Edge> GetAllEdges() => _edges;
-
-        public void RecalculateWeights()
-        {
-            
         }
     }
 }
