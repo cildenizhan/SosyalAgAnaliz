@@ -26,6 +26,18 @@
             <TextBlock x:Name="TxtConnection" Text="-" Margin="0,0,0,20"/>
 
             <Button Content="Yeniden Çiz (Rastgele)" Click="BtnRedraw_Click" Padding="5" Background="#DDDDDD"/>
+            <Separator Margin="0,10"/>
+            
+            <TextBlock Text="ANALİZ MODÜLÜ" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+
+            <Button x:Name="BtnPopular" Content="🏆 En Popüleri Bul" Click="BtnPopular_Click" Padding="5" Margin="0,0,0,10" Background="#FFD700"/>
+
+            <TextBlock Text="Yol Bulma (Önce 2 Kişi Seç):" FontWeight="Bold" Margin="0,5,0,0"/>
+            <TextBlock x:Name="TxtSelectedUsers" Text="Seçilen: Yok" FontStyle="Italic" Margin="0,0,0,5" TextWrapping="Wrap"/>
+            
+            <Button x:Name="BtnFindPath" Content="📍 En Kısa Yolu Çiz" Click="BtnFindPath_Click" Padding="5" Background="#90EE90"/>
+            
+            <Button Content="Temizle" Click="BtnClear_Click" Margin="0,5,0,0" Padding="5"/>
         </StackPanel>
     </Grid>
 </Window>
