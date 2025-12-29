@@ -37,7 +37,23 @@
             
             <Button x:Name="BtnFindPath" Content="📍 En Kısa Yolu Çiz" Click="BtnFindPath_Click" Padding="5" Background="#90EE90"/>
             <Button x:Name="BtnDijkstra" Content="📏 Dijkstra (Mesafe Bazlı)" Click="BtnDijkstra_Click" Padding="5" Background="#ADD8E6" Margin="0,5,0,0"/>
+            <Button x:Name="BtnColoring" Content="🎨 Renklendirme (Welsh-Powell)" Click="BtnColoring_Click" Padding="5" Background="#FFB6C1" Margin="0,5,0,0"/>
             <Button Content="Temizle" Click="BtnClear_Click" Margin="0,5,0,0" Padding="5"/>
+            <Separator Margin="0,10"/>
+
+            <TextBlock Text="🏆 EN ETKİLİ 5 KULLANICI" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+            
+            <ListView x:Name="LstTop5" Height="120" BorderBrush="Gray" BorderThickness="1">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Id}" Width="30"/>
+                        <GridViewColumn Header="İsim" DisplayMemberBinding="{Binding Name}" Width="100"/>
+                        <GridViewColumn Header="Puan" DisplayMemberBinding="{Binding ConnectionCount}" Width="50"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+            <Button x:Name="BtnDFS" Content="🔍 DFS ile Tara (Tümünü Bul)" Click="BtnDFS_Click" Padding="5" Background="#E6E6FA" Margin="0,10,0,0"/>
         </StackPanel>
     </Grid>
 </Window>

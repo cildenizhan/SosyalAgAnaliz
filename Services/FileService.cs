@@ -37,7 +37,7 @@ namespace SocialNetworkAnalysis.Services
                     double interaction = double.Parse(parts[3].Replace('.', ','));
                     int connectionCount = int.Parse(parts[4]);
 
-                    var node = new UserNode 
+                    var node = new Node 
                     { 
                         Id = id, 
                         Name = name, 

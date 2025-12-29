@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using SocialNetworkAnalysis.Services;
 using SocialNetworkAnalysis.Models;
+using SocialNetworkAnalysis.Algorithms;
 
 namespace SocialNetworkAnalysis
 {
@@ -16,14 +17,16 @@ namespace SocialNetworkAnalysis
         private FileService _fileService;
         private AlgorithmService _algoService;
         
-        private UserNode _firstSelected = null;
-        private UserNode _secondSelected = null;
+        private Node _firstSelected = null;
+        private Node _secondSelected = null;
 
         public MainWindow()
         {
             InitializeComponent();
             _algoService = new AlgorithmService();
             LoadData();
+            
+            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
         }
 
         private void LoadData()
@@ -100,7 +103,7 @@ namespace SocialNetworkAnalysis
         private void Node_Clicked(object sender, MouseButtonEventArgs e)
         {
             Ellipse ellipse = (Ellipse)sender;
-            UserNode node = (UserNode)ellipse.Tag;
+            Node node = (Node)ellipse.Tag;
 
             TxtName.Text = node.Name;
             TxtActivity.Text = node.Activity.ToString();
@@ -274,6 +277,64 @@ namespace SocialNetworkAnalysis
         private void MainCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             
+        }
+        
+        private void BtnColoring_Click(object sender, RoutedEventArgs e)
+        {
+            
+            WelshPowell wp = new WelshPowell();
+            var colors = wp.ColorGraph(_graphService);
+
+            
+            foreach (var child in MainCanvas.Children)
+            {
+                if (child is Line line) line.Stroke = Brushes.Gray;
+            }
+
+            var usedColors = new HashSet<string>();
+            foreach (var kvp in colors)
+            {
+                var node = kvp.Key;
+                var colorName = kvp.Value;
+                usedColors.Add(colorName);
+
+                var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(colorName);
+
+                foreach (var child in MainCanvas.Children)
+                {
+                    if (child is Ellipse el && el.Tag == node) el.Fill = brush;
+                }
+            }
+            MessageBox.Show($"Renklendirme Tamamlandı!\nKullanılan Renk Sayısı: {usedColors.Count}");
+        }
+        
+        private void BtnDFS_Click(object sender, RoutedEventArgs e)
+        {
+            if (_firstSelected == null)
+            {
+                MessageBox.Show("Lütfen haritadan başlangıç için bir kişi seçin!");
+                return;
+            }
+
+            
+            var visitedNodes = _algoService.DFS(_graphService, _firstSelected);
+
+            
+            DrawGraph();
+
+            
+            foreach (var node in visitedNodes)
+            {
+                foreach (var child in MainCanvas.Children)
+                {
+                    if (child is Ellipse el && el.Tag == node)
+                    {
+                        el.Fill = Brushes.Purple; 
+                    }
+                }
+            }
+            
+            MessageBox.Show($"DFS Tamamlandı!\nBu kişiden ulaşılabilen toplam kişi sayısı: {visitedNodes.Count}");
         }
     }
 }

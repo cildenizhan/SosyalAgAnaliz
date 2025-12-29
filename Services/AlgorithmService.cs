@@ -8,17 +8,17 @@ namespace SocialNetworkAnalysis.Services
     public class AlgorithmService
     {
         
-        public UserNode FindMostPopularUser(GraphService graph)
+        public Node FindMostPopularUser(GraphService graph)
         {
             return graph.Nodes.Values.OrderByDescending(u => u.ConnectionCount).FirstOrDefault();
         }
 
         
-        public List<UserNode> FindShortestPath(GraphService graph, UserNode start, UserNode end)
+        public List<Node> FindShortestPath(GraphService graph, Node start, Node end)
         {
-            var queue = new Queue<UserNode>();
-            var previous = new Dictionary<UserNode, UserNode>(); 
-            var visited = new HashSet<UserNode>(); 
+            var queue = new Queue<Node>();
+            var previous = new Dictionary<Node, Node>(); 
+            var visited = new HashSet<Node>(); 
 
             queue.Enqueue(start);
             visited.Add(start);
@@ -45,11 +45,11 @@ namespace SocialNetworkAnalysis.Services
         }
 
         
-        public List<UserNode> FindPathDijkstra(GraphService graph, UserNode start, UserNode end)
+        public List<Node> FindPathDijkstra(GraphService graph, Node start, Node end)
         {
-            var distances = new Dictionary<UserNode, double>();
-            var previous = new Dictionary<UserNode, UserNode>();
-            var nodes = new List<UserNode>();
+            var distances = new Dictionary<Node, double>();
+            var previous = new Dictionary<Node, Node>();
+            var nodes = new List<Node>();
 
             
             foreach (var node in graph.Nodes.Values)
@@ -90,9 +90,9 @@ namespace SocialNetworkAnalysis.Services
         }
 
         
-        private List<UserNode> ReconstructPath(Dictionary<UserNode, UserNode> previous, UserNode start, UserNode end)
+        private List<Node> ReconstructPath(Dictionary<Node, Node> previous, Node start, Node end)
         {
-            var path = new List<UserNode>();
+            var path = new List<Node>();
             var temp = end;
 
             if (!previous.ContainsKey(end)) return null; 
@@ -108,9 +108,9 @@ namespace SocialNetworkAnalysis.Services
         }
 
         
-        private List<UserNode> GetNeighbors(GraphService graph, UserNode node)
+        private List<Node> GetNeighbors(GraphService graph, Node node)
         {
-            var neighbors = new List<UserNode>();
+            var neighbors = new List<Node>();
             foreach (var edge in graph.Edges)
             {
                 if (edge.Source == node) neighbors.Add(edge.Target);
@@ -118,5 +118,66 @@ namespace SocialNetworkAnalysis.Services
             }
             return neighbors;
         }
+        
+
+        
+        private bool IsNeighbor(GraphService graph, Node u1, Node u2)
+        {
+            return graph.Edges.Any(e => (e.Source == u1 && e.Target == u2) || (e.Source == u2 && e.Target == u1));
+        }
+
+        
+        private bool CanBeColored(GraphService graph, Node node, string color, Dictionary<Node, string> currentColors)
+        {
+            var neighbors = GetNeighbors(graph, node);
+            foreach (var neighbor in neighbors)
+            {
+                if (currentColors.ContainsKey(neighbor) && currentColors[neighbor] == color)
+                {
+                    return false; 
+                }
+            }
+            return true;
+        }
+        
+        public List<Node> DFS(GraphService graph, Node start)
+        {
+            var visited = new HashSet<Node>();
+            var stack = new Stack<Node>();
+            var result = new List<Node>();
+
+            stack.Push(start);
+
+            while (stack.Count > 0)
+            {
+                var current = stack.Pop();
+
+                if (!visited.Contains(current))
+                {
+                    visited.Add(current);
+                    result.Add(current);
+
+                    
+                    foreach (var neighbor in GetNeighbors(graph, current))
+                    {
+                        if (!visited.Contains(neighbor))
+                        {
+                            stack.Push(neighbor);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        
+        public List<Node> GetTop5Users(GraphService graph)
+        {
+            return graph.Nodes.Values
+                .OrderByDescending(u => u.ConnectionCount) 
+                .Take(5) 
+                .ToList();
+        }
+
     }
 }

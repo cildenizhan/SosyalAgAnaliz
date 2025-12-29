@@ -4,41 +4,38 @@ using System.Linq;
 
 namespace SocialNetworkAnalysis.Services
 {
-    public class GraphService
+    public class GraphService : IGraphService
     {
-         
-        public Dictionary<int, UserNode> Nodes { get; private set; }
-        public List<Edge> Edges { get; private set; }
+        
+        public Graph GraphModel { get; private set; } = new Graph();
 
-        public GraphService()
-        {
-            Nodes = new Dictionary<int, UserNode>();
-            Edges = new List<Edge>();
-        }
+        
+        public Dictionary<int, Node> Nodes => GraphModel.Nodes;
+        public List<Edge> Edges => GraphModel.Edges;
 
-        public void AddNode(UserNode node)
+        public void AddNode(Node node)
         {
-            if (!Nodes.ContainsKey(node.Id))
+            if (!GraphModel.Nodes.ContainsKey(node.Id))
             {
-                Nodes.Add(node.Id, node);
+                GraphModel.Nodes.Add(node.Id, node);
             }
         }
 
         public void AddEdge(int sourceId, int targetId)
         {
-            if (Nodes.ContainsKey(sourceId) && Nodes.ContainsKey(targetId))
+            if (GraphModel.Nodes.ContainsKey(sourceId) && GraphModel.Nodes.ContainsKey(targetId))
             {
-                var source = Nodes[sourceId];
-                var target = Nodes[targetId];
+                var source = GraphModel.Nodes[sourceId];
+                var target = GraphModel.Nodes[targetId];
 
                 
-                bool exists = Edges.Any(e => 
-                    (e.Source.Id == sourceId && e.Target.Id == targetId) || 
-                    (e.Source.Id == targetId && e.Target.Id == sourceId));
+                bool exists = GraphModel.Edges.Any(e => 
+                    (e.Source == source && e.Target == target) || 
+                    (e.Source == target && e.Target == source));
 
                 if (!exists)
                 {
-                    Edges.Add(new Edge(source, target));
+                    GraphModel.Edges.Add(new Edge(source, target));
                 }
             }
         }

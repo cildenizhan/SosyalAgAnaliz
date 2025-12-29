@@ -2,15 +2,14 @@ namespace SocialNetworkAnalysis.Models
 {
     public class Edge
     {
-        public UserNode Source { get; set; }
-        public UserNode Target { get; set; }
+        public Node Source { get; set; }
+        public Node Target { get; set; }
         public double Weight { get; set; } 
 
-        public Edge(UserNode source, UserNode target)
+        public Edge(Node source, Node target)
         {
             Source = source;
             Target = target;
-            
             Weight = 0;
         }
     }
