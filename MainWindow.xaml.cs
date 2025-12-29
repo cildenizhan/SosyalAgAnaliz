@@ -15,7 +15,6 @@ namespace SocialNetworkAnalysis
         private GraphService _graphService;
         private FileService _fileService;
         private AlgorithmService _algoService;
-
         
         private UserNode _firstSelected = null;
         private UserNode _secondSelected = null;
@@ -103,12 +102,10 @@ namespace SocialNetworkAnalysis
             Ellipse ellipse = (Ellipse)sender;
             UserNode node = (UserNode)ellipse.Tag;
 
-            
             TxtName.Text = node.Name;
             TxtActivity.Text = node.Activity.ToString();
             TxtInteraction.Text = node.Interaction.ToString();
             TxtConnection.Text = node.ConnectionCount.ToString();
-
             
             if (_firstSelected == null)
             {
@@ -124,7 +121,6 @@ namespace SocialNetworkAnalysis
             }
             else
             {
-                
                 ResetSelection();
                 _firstSelected = node;
                 TxtSelectedUsers.Text = $"1. Seçilen: {node.Name}\n2. Seçin...";
@@ -141,15 +137,12 @@ namespace SocialNetworkAnalysis
             DrawGraph(); 
         }
 
-        
         private void BtnPopular_Click(object sender, RoutedEventArgs e)
         {
             var popular = _algoService.FindMostPopularUser(_graphService);
             if (popular != null)
             {
                 MessageBox.Show($"En Popüler Kişi: {popular.Name}\nBağlantı Sayısı: {popular.ConnectionCount}");
-                
-                
                 foreach (var child in MainCanvas.Children)
                 {
                     if (child is Ellipse el && el.Tag == popular)
@@ -161,7 +154,6 @@ namespace SocialNetworkAnalysis
             }
         }
 
-        
         private void BtnFindPath_Click(object sender, RoutedEventArgs e)
         {
             if (_firstSelected == null || _secondSelected == null)
@@ -179,35 +171,89 @@ namespace SocialNetworkAnalysis
             }
 
             
+            DrawGraph();
+            HighlightSelection();
+
             
             foreach (var node in path)
             {
                 foreach (var child in MainCanvas.Children)
-                {
-                    if (child is Ellipse el && el.Tag == node)
-                    {
-                        el.Fill = Brushes.LimeGreen;
-                    }
-                }
+                    if (child is Ellipse el && el.Tag == node) el.Fill = Brushes.LimeGreen;
             }
 
-            
             for (int i = 0; i < path.Count - 1; i++)
             {
                 var u1 = path[i];
                 var u2 = path[i + 1];
-
                 foreach (var child in MainCanvas.Children)
                 {
                     if (child is Line line && line.Tag is Edge edge)
                     {
-                        
                         if ((edge.Source == u1 && edge.Target == u2) || (edge.Source == u2 && edge.Target == u1))
                         {
                             line.Stroke = Brushes.LimeGreen;
                             line.StrokeThickness = 5;
                         }
                     }
+                }
+            }
+        }
+
+        
+        private void BtnDijkstra_Click(object sender, RoutedEventArgs e)
+        {
+            if (_firstSelected == null || _secondSelected == null)
+            {
+                MessageBox.Show("Lütfen haritadan iki kişi seçin!");
+                return;
+            }
+
+            var path = _algoService.FindPathDijkstra(_graphService, _firstSelected, _secondSelected);
+
+            if (path == null)
+            {
+                MessageBox.Show("Yol bulunamadı!");
+                return;
+            }
+
+            
+            DrawGraph();
+            HighlightSelection();
+
+            
+            foreach (var node in path)
+            {
+                foreach (var child in MainCanvas.Children)
+                    if (child is Ellipse el && el.Tag == node) el.Fill = Brushes.Orange;
+            }
+
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                var u1 = path[i];
+                var u2 = path[i + 1];
+                foreach (var child in MainCanvas.Children)
+                {
+                    if (child is Line line && line.Tag is Edge edge)
+                    {
+                        if ((edge.Source == u1 && edge.Target == u2) || (edge.Source == u2 && edge.Target == u1))
+                        {
+                            line.Stroke = Brushes.Orange;
+                            line.StrokeThickness = 5;
+                        }
+                    }
+                }
+            }
+            MessageBox.Show($"Dijkstra (Mesafe) Yolu Bulundu!\nAdım Sayısı: {path.Count - 1}");
+        }
+
+        
+        private void HighlightSelection()
+        {
+            foreach (var child in MainCanvas.Children)
+            {
+                if (child is Ellipse el && (el.Tag == _firstSelected || el.Tag == _secondSelected))
+                {
+                    el.Fill = Brushes.Yellow;
                 }
             }
         }
@@ -227,7 +273,6 @@ namespace SocialNetworkAnalysis
 
         private void MainCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            
             
         }
     }
