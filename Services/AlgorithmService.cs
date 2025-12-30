@@ -42,12 +42,16 @@ namespace SocialNetworkAnalysis.Services
             return ReconstructPath(previous, start, end);
         }
 
+        // 3. Algoritma: Dijkstra (Dinamik Ağırlık Hesaplamalı - Madde 4.3)
+        // 3. Algoritma: Dijkstra (Hocanın İstediği Formül - Madde 4.3)
+        //
         public List<Node>? FindPathDijkstra(IGraphService graph, Node start, Node end)
         {
             var distances = new Dictionary<Node, double>();
             var previous = new Dictionary<Node, Node>();
             var nodes = new List<Node>();
 
+            // Başlangıç ayarları: Herkes sonsuz uzaklıkta, başlangıç noktası 0
             foreach (var node in graph.Nodes.Values)
             {
                 if (node == start) distances[node] = 0;
@@ -58,6 +62,7 @@ namespace SocialNetworkAnalysis.Services
 
             while (nodes.Count > 0)
             {
+                // En kısa mesafeye (en düşük maliyete) sahip düğümü seç
                 nodes.Sort((x, y) => distances[x].CompareTo(distances[y]));
                 var current = nodes[0];
                 nodes.Remove(current);
@@ -65,10 +70,24 @@ namespace SocialNetworkAnalysis.Services
                 if (current == end) break;
                 if (distances[current] == double.MaxValue) break; 
 
+                // Komşuları gez
                 foreach (var neighbor in GetNeighbors(graph, current))
                 {
-                    double weight = Math.Sqrt(Math.Pow(current.X - neighbor.X, 2) + Math.Pow(current.Y - neighbor.Y, 2));
+                    // --- BURASI DEĞİŞTİ: HOCANIN İSTEDİĞİ MATEMATİKSEL FORMÜL ---
                     
+                    // 1. Özelliklerin farklarının karesini al
+                    double diffActivity = Math.Pow(current.Activity - neighbor.Activity, 2);
+                    double diffInteraction = Math.Pow(current.Interaction - neighbor.Interaction, 2);
+                    double diffConnections = Math.Pow(current.ConnectionCount - neighbor.ConnectionCount, 2); // Tablodaki "Bağl. Sayısı"
+
+                    // 2. Formülün paydası: 1 + Karekök(Farklar Toplamı)
+                    double denominator = 1.0 + Math.Sqrt(diffActivity + diffInteraction + diffConnections);
+
+                    // 3. Ağırlık (Maliyet) Hesabı: 1 / Payda
+                    double weight = 1.0 / denominator;
+
+                    // -----------------------------------------------------------
+
                     double alt = distances[current] + weight;
                     
                     if (alt < distances[neighbor])
