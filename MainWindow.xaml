@@ -58,6 +58,28 @@
                 <Button x:Name="BtnComponents" Content="🧩 Ayrık Grupları Bul" Click="BtnComponents_Click" Padding="5" Background="#FFDAB9" Margin="0,5,0,0"/>
                 
                 <Separator Margin="0,10"/>
+                <Separator Margin="0,10"/>
+                <TextBlock Text="DÜZENLEME MODÜLÜ" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button Grid.Column="0" Content="➕ Kişi Ekle" Click="BtnAddNode_Click" Margin="0,0,2,0" Padding="5" Background="#BDFCC9"/>
+                    <Button Grid.Column="1" Content="❌ Kişi Sil" Click="BtnDeleteNode_Click" Margin="2,0,0,0" Padding="5" Background="#FF9999"/>
+                </Grid>
+
+                <Grid Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0" Content="🔗 Bağla" Click="BtnAddEdge_Click" Margin="0,0,2,0" Padding="5" Background="#E0E0E0"/>
+                    <Button Grid.Column="1" Content="✂️ Kopar" Click="BtnRemoveEdge_Click" Margin="2,0,0,0" Padding="5" Background="#E0E0E0"/>
+                </Grid>
                 <TextBlock Text="DOSYA İŞLEMLERİ" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
                 
                 <Grid>

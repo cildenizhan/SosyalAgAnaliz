@@ -421,5 +421,87 @@ namespace SocialNetworkAnalysis
         private void MainCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
         }
+
+        private void BtnAddNode_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null) return;
+
+            int newId = 1;
+            if (_graphService.Nodes.Count > 0)
+            {
+                int maxId = 0;
+                foreach(var key in _graphService.Nodes.Keys)
+                {
+                    if (key > maxId) maxId = key;
+                }
+                newId = maxId + 1;
+            }
+
+            Node newNode = new Node
+            {
+                Id = newId,
+                Name = $"User_{newId}", 
+                Activity = 0.5,
+                Interaction = 10,
+                ConnectionCount = 0
+            };
+
+            _graphService.AddNode(newNode);
+
+            Random rnd = new Random();
+            newNode.X = rnd.Next(50, (int)MainCanvas.ActualWidth - 50);
+            newNode.Y = rnd.Next(50, (int)MainCanvas.ActualHeight - 50);
+
+            DrawGraph();
+            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
+            MessageBox.Show($"Yeni kişi eklendi: {newNode.Name}");
+        }
+
+        private void BtnDeleteNode_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null || _firstSelected == null)
+            {
+                MessageBox.Show("Lütfen silmek için haritadan bir kişi seçin (Sarı renkli).");
+                return;
+            }
+
+            var result = MessageBox.Show($"{_firstSelected.Name} kişisini silmek istiyor musunuz?", "Silme Onayı", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            
+            if (result == MessageBoxResult.Yes)
+            {
+                _graphService.RemoveNode(_firstSelected.Id);
+                ResetSelection(); 
+                LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
+                MessageBox.Show("Kişi silindi.");
+            }
+        }
+
+        private void BtnAddEdge_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null || _firstSelected == null || _secondSelected == null)
+            {
+                MessageBox.Show("Lütfen bağlamak için iki kişi seçin.");
+                return;
+            }
+
+            _graphService.AddEdge(_firstSelected.Id, _secondSelected.Id);
+            DrawGraph();
+            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService); 
+            MessageBox.Show("Bağlantı kuruldu!");
+        }
+
+        private void BtnRemoveEdge_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null || _firstSelected == null || _secondSelected == null)
+            {
+                MessageBox.Show("Lütfen bağlantısını koparmak için iki kişi seçin.");
+                return;
+            }
+
+            _graphService.RemoveEdge(_firstSelected.Id, _secondSelected.Id);
+            DrawGraph();
+            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
+            MessageBox.Show("Bağlantı koparıldı.");
+        }
     }
 }
