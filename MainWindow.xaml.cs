@@ -13,20 +13,18 @@ namespace SocialNetworkAnalysis
 {
     public partial class MainWindow : Window
     {
-        private GraphService _graphService;
-        private FileService _fileService;
+        private IGraphService? _graphService;
+        private FileService? _fileService;
         private AlgorithmService _algoService;
         
-        private Node _firstSelected = null;
-        private Node _secondSelected = null;
+        private Node? _firstSelected = null;
+        private Node? _secondSelected = null;
 
         public MainWindow()
         {
             InitializeComponent();
             _algoService = new AlgorithmService();
             LoadData();
-            
-            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
         }
 
         private void LoadData()
@@ -37,15 +35,18 @@ namespace SocialNetworkAnalysis
 
             _graphService = _fileService.LoadGraph(path);
 
-            if (_graphService.Nodes.Count > 0)
+            if (_graphService != null && _graphService.Nodes.Count > 0)
             {
                 AssignRandomPositions();
                 DrawGraph();
+                LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
             }
         }
 
         private void AssignRandomPositions()
         {
+            if (_graphService == null) return;
+
             Random rnd = new Random();
             double width = MainCanvas.ActualWidth > 0 ? MainCanvas.ActualWidth : 800;
             double height = MainCanvas.ActualHeight > 0 ? MainCanvas.ActualHeight : 600;
@@ -59,9 +60,9 @@ namespace SocialNetworkAnalysis
 
         private void DrawGraph()
         {
+            if (_graphService == null) return;
             MainCanvas.Children.Clear();
 
-            
             foreach (var edge in _graphService.Edges)
             {
                 Line line = new Line
@@ -77,7 +78,6 @@ namespace SocialNetworkAnalysis
                 MainCanvas.Children.Add(line);
             }
 
-            
             foreach (var node in _graphService.Nodes.Values)
             {
                 Ellipse ellipse = new Ellipse
@@ -113,7 +113,7 @@ namespace SocialNetworkAnalysis
             if (_firstSelected == null)
             {
                 _firstSelected = node;
-                TxtSelectedUsers.Text = $"1. Seçilen: {node.Name}\n2. Seçin...";
+                TxtSelectedUsers.Text = $"1. {node.Name}\n2. Seçin...";
                 ellipse.Fill = Brushes.Yellow; 
             }
             else if (_secondSelected == null && node != _firstSelected)
@@ -126,7 +126,7 @@ namespace SocialNetworkAnalysis
             {
                 ResetSelection();
                 _firstSelected = node;
-                TxtSelectedUsers.Text = $"1. Seçilen: {node.Name}\n2. Seçin...";
+                TxtSelectedUsers.Text = $"1. {node.Name}\n2. Seçin...";
                 ellipse.Fill = Brushes.Yellow;
             }
             e.Handled = true;
@@ -142,6 +142,8 @@ namespace SocialNetworkAnalysis
 
         private void BtnPopular_Click(object sender, RoutedEventArgs e)
         {
+            if (_graphService == null) return;
+
             var popular = _algoService.FindMostPopularUser(_graphService);
             if (popular != null)
             {
@@ -159,7 +161,7 @@ namespace SocialNetworkAnalysis
 
         private void BtnFindPath_Click(object sender, RoutedEventArgs e)
         {
-            if (_firstSelected == null || _secondSelected == null)
+            if (_graphService == null || _firstSelected == null || _secondSelected == null)
             {
                 MessageBox.Show("Lütfen haritadan iki kişi seçin!");
                 return;
@@ -173,11 +175,9 @@ namespace SocialNetworkAnalysis
                 return;
             }
 
-            
             DrawGraph();
             HighlightSelection();
 
-            
             foreach (var node in path)
             {
                 foreach (var child in MainCanvas.Children)
@@ -202,10 +202,9 @@ namespace SocialNetworkAnalysis
             }
         }
 
-        
         private void BtnDijkstra_Click(object sender, RoutedEventArgs e)
         {
-            if (_firstSelected == null || _secondSelected == null)
+            if (_graphService == null || _firstSelected == null || _secondSelected == null)
             {
                 MessageBox.Show("Lütfen haritadan iki kişi seçin!");
                 return;
@@ -219,11 +218,9 @@ namespace SocialNetworkAnalysis
                 return;
             }
 
-            
             DrawGraph();
             HighlightSelection();
 
-            
             foreach (var node in path)
             {
                 foreach (var child in MainCanvas.Children)
@@ -249,7 +246,6 @@ namespace SocialNetworkAnalysis
             MessageBox.Show($"Dijkstra (Mesafe) Yolu Bulundu!\nAdım Sayısı: {path.Count - 1}");
         }
 
-        
         private void HighlightSelection()
         {
             foreach (var child in MainCanvas.Children)
@@ -281,11 +277,11 @@ namespace SocialNetworkAnalysis
         
         private void BtnColoring_Click(object sender, RoutedEventArgs e)
         {
-            
+            if (_graphService == null) return;
+
             WelshPowell wp = new WelshPowell();
             var colors = wp.ColorGraph(_graphService);
 
-            
             foreach (var child in MainCanvas.Children)
             {
                 if (child is Line line) line.Stroke = Brushes.Gray;
@@ -310,19 +306,16 @@ namespace SocialNetworkAnalysis
         
         private void BtnDFS_Click(object sender, RoutedEventArgs e)
         {
-            if (_firstSelected == null)
+            if (_graphService == null || _firstSelected == null)
             {
                 MessageBox.Show("Lütfen haritadan başlangıç için bir kişi seçin!");
                 return;
             }
 
-            
             var visitedNodes = _algoService.DFS(_graphService, _firstSelected);
 
-            
             DrawGraph();
 
-            
             foreach (var node in visitedNodes)
             {
                 foreach (var child in MainCanvas.Children)
@@ -335,6 +328,41 @@ namespace SocialNetworkAnalysis
             }
             
             MessageBox.Show($"DFS Tamamlandı!\nBu kişiden ulaşılabilen toplam kişi sayısı: {visitedNodes.Count}");
+        }
+
+        private void BtnComponents_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null) return;
+
+            var components = _algoService.FindConnectedComponents(_graphService);
+
+            foreach (var child in MainCanvas.Children)
+            {
+                if (child is Line line) line.Stroke = Brushes.Gray;
+            }
+
+            string[] groupColors = { "Red", "Blue", "Green", "Orange", "Purple", "Cyan", "Magenta", "Brown" };
+            int colorIndex = 0;
+
+            foreach (var group in components)
+            {
+                string colorName = groupColors[colorIndex % groupColors.Length];
+                var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(colorName);
+
+                foreach (var node in group)
+                {
+                    foreach (var child in MainCanvas.Children)
+                    {
+                        if (child is Ellipse el && el.Tag == node)
+                        {
+                            el.Fill = brush;
+                        }
+                    }
+                }
+                colorIndex++;
+            }
+
+            MessageBox.Show($"Analiz Tamamlandı!\nToplam {components.Count} farklı grup (ayrık bileşen) bulundu.");
         }
     }
 }
