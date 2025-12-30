@@ -1,60 +1,77 @@
 ﻿<Window x:Class="SocialNetworkAnalysis.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Sosyal Ağ Analizi - Görselleştirme" Height="600" Width="900">
+        Title="Sosyal Ağ Analizi - Görselleştirme" Height="650" Width="1000">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/> <ColumnDefinition Width="250"/> </Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/> <ColumnDefinition Width="280"/> </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" Margin="5">
             <Canvas x:Name="MainCanvas" Background="#f0f0f0" MouseLeftButtonDown="MainCanvas_MouseLeftButtonDown"/>
         </Border>
 
-        <StackPanel Grid.Column="1" Margin="10" Background="WhiteSmoke">
-            <TextBlock Text="KULLANICI BİLGİLERİ" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-            
-            <TextBlock Text="Adı:" FontWeight="Bold"/>
-            <TextBlock x:Name="TxtName" Text="-" Margin="0,0,0,10"/>
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="10" Background="WhiteSmoke">
+                <TextBlock Text="KULLANICI BİLGİLERİ" FontWeight="Bold" FontSize="16" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                
+                <TextBlock Text="Adı:" FontWeight="Bold"/>
+                <TextBlock x:Name="TxtName" Text="-" Margin="0,0,0,10"/>
 
-            <TextBlock Text="Aktiflik:" FontWeight="Bold"/>
-            <TextBlock x:Name="TxtActivity" Text="-" Margin="0,0,0,10"/>
+                <TextBlock Text="Aktiflik:" FontWeight="Bold"/>
+                <TextBlock x:Name="TxtActivity" Text="-" Margin="0,0,0,10"/>
 
-            <TextBlock Text="Etkileşim:" FontWeight="Bold"/>
-            <TextBlock x:Name="TxtInteraction" Text="-" Margin="0,0,0,10"/>
+                <TextBlock Text="Etkileşim:" FontWeight="Bold"/>
+                <TextBlock x:Name="TxtInteraction" Text="-" Margin="0,0,0,10"/>
 
-            <TextBlock Text="Bağlantı Sayısı:" FontWeight="Bold"/>
-            <TextBlock x:Name="TxtConnection" Text="-" Margin="0,0,0,20"/>
+                <TextBlock Text="Bağlantı Sayısı:" FontWeight="Bold"/>
+                <TextBlock x:Name="TxtConnection" Text="-" Margin="0,0,0,20"/>
 
-            <Button Content="Yeniden Çiz (Rastgele)" Click="BtnRedraw_Click" Padding="5" Background="#DDDDDD"/>
-            <Separator Margin="0,10"/>
-            
-            <TextBlock Text="ANALİZ MODÜLÜ" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                <Button Content="Yeniden Çiz (Rastgele)" Click="BtnRedraw_Click" Padding="5" Background="#DDDDDD"/>
+                <Separator Margin="0,10"/>
+                
+                <TextBlock Text="ANALİZ MODÜLÜ" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
 
-            <Button x:Name="BtnPopular" Content="🏆 En Popüleri Bul" Click="BtnPopular_Click" Padding="5" Margin="0,0,0,10" Background="#FFD700"/>
+                <Button x:Name="BtnPopular" Content="🏆 En Popüleri Bul" Click="BtnPopular_Click" Padding="5" Margin="0,0,0,10" Background="#FFD700"/>
 
-            <TextBlock Text="Yol Bulma (Önce 2 Kişi Seç):" FontWeight="Bold" Margin="0,5,0,0"/>
-            <TextBlock x:Name="TxtSelectedUsers" Text="Seçilen: Yok" FontStyle="Italic" Margin="0,0,0,5" TextWrapping="Wrap"/>
-            
-            <Button x:Name="BtnFindPath" Content="📍 En Kısa Yolu Çiz" Click="BtnFindPath_Click" Padding="5" Background="#90EE90"/>
-            <Button x:Name="BtnDijkstra" Content="📏 Dijkstra (Mesafe Bazlı)" Click="BtnDijkstra_Click" Padding="5" Background="#ADD8E6" Margin="0,5,0,0"/>
-            <Button x:Name="BtnColoring" Content="🎨 Renklendirme (Welsh-Powell)" Click="BtnColoring_Click" Padding="5" Background="#FFB6C1" Margin="0,5,0,0"/>
-            <Button Content="Temizle" Click="BtnClear_Click" Margin="0,5,0,0" Padding="5"/>
-            <Separator Margin="0,10"/>
+                <TextBlock Text="Yol Bulma (Önce 2 Kişi Seç):" FontWeight="Bold" Margin="0,5,0,0"/>
+                <TextBlock x:Name="TxtSelectedUsers" Text="Seçilen: Yok" FontStyle="Italic" Margin="0,0,0,5" TextWrapping="Wrap"/>
+                
+                <Button x:Name="BtnFindPath" Content="📍 En Kısa Yolu Çiz" Click="BtnFindPath_Click" Padding="5" Background="#90EE90"/>
+                <Button x:Name="BtnDijkstra" Content="📏 Dijkstra (Mesafe Bazlı)" Click="BtnDijkstra_Click" Padding="5" Background="#ADD8E6" Margin="0,5,0,0"/>
+                <Button x:Name="BtnColoring" Content="🎨 Renklendirme (Welsh-Powell)" Click="BtnColoring_Click" Padding="5" Background="#FFB6C1" Margin="0,5,0,0"/>
+                <Button Content="Temizle" Click="BtnClear_Click" Margin="0,5,0,0" Padding="5"/>
+                <Separator Margin="0,10"/>
 
-            <TextBlock Text="🏆 EN ETKİLİ 5 KULLANICI" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
-            
-            <ListView x:Name="LstTop5" Height="120" BorderBrush="Gray" BorderThickness="1">
-                <ListView.View>
-                    <GridView>
-                        <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Id}" Width="30"/>
-                        <GridViewColumn Header="İsim" DisplayMemberBinding="{Binding Name}" Width="100"/>
-                        <GridViewColumn Header="Puan" DisplayMemberBinding="{Binding ConnectionCount}" Width="50"/>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+                <TextBlock Text="🏆 EN ETKİLİ 5 KULLANICI" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                
+                <ListView x:Name="LstTop5" Height="120" BorderBrush="Gray" BorderThickness="1">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="ID" DisplayMemberBinding="{Binding Id}" Width="30"/>
+                            <GridViewColumn Header="İsim" DisplayMemberBinding="{Binding Name}" Width="100"/>
+                            <GridViewColumn Header="Puan" DisplayMemberBinding="{Binding ConnectionCount}" Width="50"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
 
-            <Button x:Name="BtnDFS" Content="🔍 DFS ile Tara (Tümünü Bul)" Click="BtnDFS_Click" Padding="5" Background="#E6E6FA" Margin="0,10,0,0"/>
-            <Button x:Name="BtnComponents" Content="🧩 Ayrık Grupları Bul" Click="BtnComponents_Click" Padding="5" Background="#FFDAB9" Margin="0,5,0,0"/>
-        </StackPanel>
+                <Button x:Name="BtnDFS" Content="🔍 DFS ile Tara (Tümünü Bul)" Click="BtnDFS_Click" Padding="5" Background="#E6E6FA" Margin="0,10,0,0"/>
+                <Button x:Name="BtnComponents" Content="🧩 Ayrık Grupları Bul" Click="BtnComponents_Click" Padding="5" Background="#FFDAB9" Margin="0,5,0,0"/>
+                
+                <Separator Margin="0,10"/>
+                <TextBlock Text="DOSYA İŞLEMLERİ" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,5"/>
+                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Button Grid.Column="0" Content="💾 Kaydet (JSON)" Click="BtnSave_Click" Margin="0,0,2,0" Padding="5" Background="#87CEFA"/>
+                    <Button Grid.Column="1" Content="📂 Yükle (JSON)" Click="BtnLoad_Click" Margin="2,0,0,0" Padding="5" Background="#87CEFA"/>
+                </Grid>
+                
+                <TextBlock Text="" Height="20"/>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Window>

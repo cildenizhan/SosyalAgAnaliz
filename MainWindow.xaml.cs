@@ -30,11 +30,30 @@ namespace SocialNetworkAnalysis
         private void LoadData()
         {
             _fileService = new FileService();
-            string path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "data.csv");
-            if (!System.IO.File.Exists(path)) path = "data.csv";
+            string fileName = "data.csv";
+            
+            
+            string basePath = System.AppDomain.CurrentDomain.BaseDirectory; 
+            string projectPath = System.IO.Directory.GetParent(basePath)?.Parent?.Parent?.FullName ?? basePath; 
+            
+            string finalPath = "";
 
-            _graphService = _fileService.LoadGraph(path);
+            if (System.IO.File.Exists(System.IO.Path.Combine(basePath, fileName)))
+            {
+                finalPath = System.IO.Path.Combine(basePath, fileName);
+            }
+            else if (System.IO.File.Exists(System.IO.Path.Combine(projectPath, fileName)))
+            {
+                finalPath = System.IO.Path.Combine(projectPath, fileName);
+            }
 
+            
+            if (string.IsNullOrEmpty(finalPath)) return;
+
+            
+            _graphService = _fileService.LoadGraph(finalPath);
+
+            
             if (_graphService != null && _graphService.Nodes.Count > 0)
             {
                 AssignRandomPositions();
@@ -48,13 +67,25 @@ namespace SocialNetworkAnalysis
             if (_graphService == null) return;
 
             Random rnd = new Random();
-            double width = MainCanvas.ActualWidth > 0 ? MainCanvas.ActualWidth : 800;
-            double height = MainCanvas.ActualHeight > 0 ? MainCanvas.ActualHeight : 600;
+            double width = MainCanvas.ActualWidth;
+            double height = MainCanvas.ActualHeight;
+
+            
+            if (width <= 0 || double.IsNaN(width)) width = 800;
+            if (height <= 0 || double.IsNaN(height)) height = 600;
+
+            int padding = 50; 
 
             foreach (var node in _graphService.Nodes.Values)
             {
-                node.X = rnd.Next(50, (int)width - 50);
-                node.Y = rnd.Next(50, (int)height - 50);
+                int maxX = (int)width - padding;
+                int maxY = (int)height - padding;
+
+                if (maxX <= padding) maxX = padding + 50;
+                if (maxY <= padding) maxY = padding + 50;
+
+                node.X = rnd.Next(padding, maxX);
+                node.Y = rnd.Next(padding, maxY);
             }
         }
 
@@ -63,6 +94,7 @@ namespace SocialNetworkAnalysis
             if (_graphService == null) return;
             MainCanvas.Children.Clear();
 
+            
             foreach (var edge in _graphService.Edges)
             {
                 Line line = new Line
@@ -78,6 +110,7 @@ namespace SocialNetworkAnalysis
                 MainCanvas.Children.Add(line);
             }
 
+            
             foreach (var node in _graphService.Nodes.Values)
             {
                 Ellipse ellipse = new Ellipse
@@ -91,7 +124,13 @@ namespace SocialNetworkAnalysis
                 Canvas.SetLeft(ellipse, node.X);
                 Canvas.SetTop(ellipse, node.Y);
 
-                TextBlock textBlock = new TextBlock { Text = node.Name, FontWeight = FontWeights.Bold };
+                TextBlock textBlock = new TextBlock 
+                { 
+                    Text = node.Name, 
+                    FontWeight = FontWeights.Bold,
+                    IsHitTestVisible = false 
+                };
+                
                 Canvas.SetLeft(textBlock, node.X);
                 Canvas.SetTop(textBlock, node.Y - 15);
 
@@ -137,17 +176,25 @@ namespace SocialNetworkAnalysis
             _firstSelected = null;
             _secondSelected = null;
             TxtSelectedUsers.Text = "Seçilen: Yok";
-            DrawGraph(); 
+            DrawGraph();
+        }
+
+        
+        private void BtnRedraw_Click(object sender, RoutedEventArgs e)
+        {
+            AssignRandomPositions();
+            ResetSelection();
         }
 
         private void BtnPopular_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null) return;
-
+            
             var popular = _algoService.FindMostPopularUser(_graphService);
             if (popular != null)
             {
                 MessageBox.Show($"En Popüler Kişi: {popular.Name}\nBağlantı Sayısı: {popular.ConnectionCount}");
+                
                 foreach (var child in MainCanvas.Children)
                 {
                     if (child is Ellipse el && el.Tag == popular)
@@ -257,28 +304,9 @@ namespace SocialNetworkAnalysis
             }
         }
 
-        private void BtnRedraw_Click(object sender, RoutedEventArgs e)
-        {
-            AssignRandomPositions();
-            DrawGraph();
-            ResetSelection();
-        }
-
-        private void BtnClear_Click(object sender, RoutedEventArgs e)
-        {
-            DrawGraph();
-            ResetSelection();
-        }
-
-        private void MainCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            
-        }
-        
         private void BtnColoring_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null) return;
-
             WelshPowell wp = new WelshPowell();
             var colors = wp.ColorGraph(_graphService);
 
@@ -290,20 +318,17 @@ namespace SocialNetworkAnalysis
             var usedColors = new HashSet<string>();
             foreach (var kvp in colors)
             {
-                var node = kvp.Key;
                 var colorName = kvp.Value;
                 usedColors.Add(colorName);
-
                 var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(colorName);
-
                 foreach (var child in MainCanvas.Children)
                 {
-                    if (child is Ellipse el && el.Tag == node) el.Fill = brush;
+                    if (child is Ellipse el && el.Tag == kvp.Key) el.Fill = brush;
                 }
             }
             MessageBox.Show($"Renklendirme Tamamlandı!\nKullanılan Renk Sayısı: {usedColors.Count}");
         }
-        
+
         private void BtnDFS_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null)
@@ -313,27 +338,21 @@ namespace SocialNetworkAnalysis
             }
 
             var visitedNodes = _algoService.DFS(_graphService, _firstSelected);
-
             DrawGraph();
 
             foreach (var node in visitedNodes)
             {
                 foreach (var child in MainCanvas.Children)
                 {
-                    if (child is Ellipse el && el.Tag == node)
-                    {
-                        el.Fill = Brushes.Purple; 
-                    }
+                    if (child is Ellipse el && el.Tag == node) el.Fill = Brushes.Purple; 
                 }
             }
-            
             MessageBox.Show($"DFS Tamamlandı!\nBu kişiden ulaşılabilen toplam kişi sayısı: {visitedNodes.Count}");
         }
 
         private void BtnComponents_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null) return;
-
             var components = _algoService.FindConnectedComponents(_graphService);
 
             foreach (var child in MainCanvas.Children)
@@ -353,16 +372,54 @@ namespace SocialNetworkAnalysis
                 {
                     foreach (var child in MainCanvas.Children)
                     {
-                        if (child is Ellipse el && el.Tag == node)
-                        {
-                            el.Fill = brush;
-                        }
+                        if (child is Ellipse el && el.Tag == node) el.Fill = brush;
                     }
                 }
                 colorIndex++;
             }
-
             MessageBox.Show($"Analiz Tamamlandı!\nToplam {components.Count} farklı grup (ayrık bileşen) bulundu.");
+        }
+
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null) return;
+
+            try
+            {
+                string path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "saved_graph.json");
+                _fileService.SaveGraphJson(_graphService, path);
+                MessageBox.Show("Kayıt Başarılı!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Kayıt Hatası: {ex.Message}");
+            }
+        }
+
+        private void BtnLoad_Click(object sender, RoutedEventArgs e)
+        {
+            string path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "saved_graph.json");
+            
+            if (!System.IO.File.Exists(path))
+            {
+                MessageBox.Show("Kaydedilmiş dosya bulunamadı.");
+                return;
+            }
+
+            _graphService = _fileService.LoadGraphJson(path);
+            DrawGraph();
+            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
+            MessageBox.Show("Yükleme Başarılı!");
+        }
+
+        private void BtnClear_Click(object sender, RoutedEventArgs e)
+        {
+            DrawGraph();
+            ResetSelection();
+        }
+
+        private void MainCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
         }
     }
 }
