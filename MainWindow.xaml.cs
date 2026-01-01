@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -20,6 +21,10 @@ namespace SocialNetworkAnalysis
         private Node? _firstSelected = null;
         private Node? _secondSelected = null;
 
+        private bool _isDragging = false;
+        private Node? _draggedNode = null;
+        private Ellipse? _draggedEllipse = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -31,7 +36,6 @@ namespace SocialNetworkAnalysis
         {
             _fileService = new FileService();
             string fileName = "data.csv";
-            
             
             string basePath = System.AppDomain.CurrentDomain.BaseDirectory; 
             string projectPath = System.IO.Directory.GetParent(basePath)?.Parent?.Parent?.FullName ?? basePath; 
@@ -47,13 +51,10 @@ namespace SocialNetworkAnalysis
                 finalPath = System.IO.Path.Combine(projectPath, fileName);
             }
 
-            
             if (string.IsNullOrEmpty(finalPath)) return;
 
-            
             _graphService = _fileService.LoadGraph(finalPath);
 
-            
             if (_graphService != null && _graphService.Nodes.Count > 0)
             {
                 AssignRandomPositions();
@@ -70,7 +71,6 @@ namespace SocialNetworkAnalysis
             double width = MainCanvas.ActualWidth;
             double height = MainCanvas.ActualHeight;
 
-            
             if (width <= 0 || double.IsNaN(width)) width = 800;
             if (height <= 0 || double.IsNaN(height)) height = 600;
 
@@ -94,7 +94,6 @@ namespace SocialNetworkAnalysis
             if (_graphService == null) return;
             MainCanvas.Children.Clear();
 
-            
             foreach (var edge in _graphService.Edges)
             {
                 Line line = new Line
@@ -110,14 +109,14 @@ namespace SocialNetworkAnalysis
                 MainCanvas.Children.Add(line);
             }
 
-            
             foreach (var node in _graphService.Nodes.Values)
             {
                 Ellipse ellipse = new Ellipse
                 {
                     Width = 30, Height = 30,
                     Fill = Brushes.LightBlue, Stroke = Brushes.Black,
-                    Tag = node
+                    Tag = node,
+                    Cursor = Cursors.Hand
                 };
                 ellipse.MouseLeftButtonDown += Node_Clicked;
 
@@ -144,6 +143,11 @@ namespace SocialNetworkAnalysis
             Ellipse ellipse = (Ellipse)sender;
             Node node = (Node)ellipse.Tag;
 
+            _isDragging = true;
+            _draggedNode = node;
+            _draggedEllipse = ellipse;
+            ellipse.CaptureMouse();
+
             TxtName.Text = node.Name;
             TxtActivity.Text = node.Activity.ToString();
             TxtInteraction.Text = node.Interaction.ToString();
@@ -161,7 +165,7 @@ namespace SocialNetworkAnalysis
                 TxtSelectedUsers.Text = $"1. {_firstSelected.Name}\n2. {_secondSelected.Name}";
                 ellipse.Fill = Brushes.Yellow; 
             }
-            else
+            else if (node != _firstSelected && node != _secondSelected)
             {
                 ResetSelection();
                 _firstSelected = node;
@@ -169,6 +173,96 @@ namespace SocialNetworkAnalysis
                 ellipse.Fill = Brushes.Yellow;
             }
             e.Handled = true;
+        }
+
+        private void MainCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDragging && _draggedNode != null && _draggedEllipse != null)
+            {
+                Point currentPos = e.GetPosition(MainCanvas);
+                
+                double newX = currentPos.X - 15;
+                double newY = currentPos.Y - 15;
+
+                _draggedNode.X = (int)newX;
+                _draggedNode.Y = (int)newY;
+
+                Canvas.SetLeft(_draggedEllipse, newX);
+                Canvas.SetTop(_draggedEllipse, newY);
+
+                foreach (var child in MainCanvas.Children)
+                {
+                    if (child is TextBlock tb && tb.Text == _draggedNode.Name)
+                    {
+                        Canvas.SetLeft(tb, newX);
+                        Canvas.SetTop(tb, newY - 15);
+                        break;
+                    }
+                }
+
+                UpdateConnectedEdges(_draggedNode);
+            }
+        }
+
+        private void MainCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isDragging)
+            {
+                _isDragging = false;
+                if (_draggedEllipse != null)
+                {
+                    _draggedEllipse.ReleaseMouseCapture();
+                }
+                _draggedNode = null;
+                _draggedEllipse = null;
+            }
+        }
+
+        private void UpdateConnectedEdges(Node movedNode)
+        {
+            foreach (var child in MainCanvas.Children)
+            {
+                if (child is Line line && line.Tag is Edge edge)
+                {
+                    if (edge.Source == movedNode)
+                    {
+                        line.X1 = movedNode.X + 15;
+                        line.Y1 = movedNode.Y + 15;
+                    }
+                    else if (edge.Target == movedNode)
+                    {
+                        line.X2 = movedNode.X + 15;
+                        line.Y2 = movedNode.Y + 15;
+                    }
+                }
+            }
+        }
+
+        private void MainCanvas_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (_graphService == null) return;
+
+            Point clickPoint = e.GetPosition(MainCanvas);
+
+            int newId = 1;
+            if (_graphService.Nodes.Count > 0)
+                newId = _graphService.Nodes.Keys.Max() + 1;
+
+            Node newNode = new Node
+            {
+                Id = newId,
+                Name = $"User_{newId}",
+                Activity = 0.5,
+                Interaction = 5,
+                ConnectionCount = 0,
+                X = (int)clickPoint.X - 15,
+                Y = (int)clickPoint.Y - 15
+            };
+
+            _graphService.AddNode(newNode);
+            
+            DrawGraph();
+            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
         }
 
         private void ResetSelection()
@@ -179,7 +273,6 @@ namespace SocialNetworkAnalysis
             DrawGraph();
         }
 
-        
         private void BtnRedraw_Click(object sender, RoutedEventArgs e)
         {
             AssignRandomPositions();
@@ -424,37 +517,7 @@ namespace SocialNetworkAnalysis
 
         private void BtnAddNode_Click(object sender, RoutedEventArgs e)
         {
-            if (_graphService == null) return;
-
-            int newId = 1;
-            if (_graphService.Nodes.Count > 0)
-            {
-                int maxId = 0;
-                foreach(var key in _graphService.Nodes.Keys)
-                {
-                    if (key > maxId) maxId = key;
-                }
-                newId = maxId + 1;
-            }
-
-            Node newNode = new Node
-            {
-                Id = newId,
-                Name = $"User_{newId}", 
-                Activity = 0.5,
-                Interaction = 10,
-                ConnectionCount = 0
-            };
-
-            _graphService.AddNode(newNode);
-
-            Random rnd = new Random();
-            newNode.X = rnd.Next(50, (int)MainCanvas.ActualWidth - 50);
-            newNode.Y = rnd.Next(50, (int)MainCanvas.ActualHeight - 50);
-
-            DrawGraph();
-            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
-            MessageBox.Show($"Yeni kişi eklendi: {newNode.Name}");
+            MessageBox.Show("Lütfen haritaya SAĞ tıklayarak ekleyin.");
         }
 
         private void BtnDeleteNode_Click(object sender, RoutedEventArgs e)

@@ -7,7 +7,11 @@
             <ColumnDefinition Width="*"/> <ColumnDefinition Width="280"/> </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0" BorderBrush="Black" BorderThickness="1" Margin="5">
-            <Canvas x:Name="MainCanvas" Background="#f0f0f0" MouseLeftButtonDown="MainCanvas_MouseLeftButtonDown"/>
+            <Canvas x:Name="MainCanvas" Background="#f0f0f0" 
+        MouseLeftButtonDown="MainCanvas_MouseLeftButtonDown"
+        MouseRightButtonDown="MainCanvas_MouseRightButtonDown"
+        MouseMove="MainCanvas_MouseMove"
+        MouseLeftButtonUp="MainCanvas_MouseLeftButtonUp"/>
         </Border>
 
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
