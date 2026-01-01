@@ -566,5 +566,110 @@ namespace SocialNetworkAnalysis
             LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
             MessageBox.Show("Bağlantı koparıldı.");
         }
+        
+        private void BtnRandomTest_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null) return;
+            
+            
+
+            Random rnd = new Random();
+            int startId = _graphService.Nodes.Count + 1;
+            int count = 50; 
+
+            
+            for (int i = 0; i < count; i++)
+            {
+                var node = new Node
+                {
+                    Id = startId + i,
+                    Name = $"TestUser_{startId + i}",
+                    Activity = rnd.NextDouble(),        
+                    Interaction = rnd.Next(1, 100),     
+                    ConnectionCount = 0,
+                    X = rnd.Next(50, (int)MainCanvas.ActualWidth - 50),
+                    Y = rnd.Next(50, (int)MainCanvas.ActualHeight - 50)
+                };
+                _graphService.AddNode(node);
+            }
+
+            
+            var allNodes = _graphService.Nodes.Values.ToList();
+            for (int i = 0; i < count * 2; i++) 
+            {
+                var n1 = allNodes[rnd.Next(allNodes.Count)];
+                var n2 = allNodes[rnd.Next(allNodes.Count)];
+                
+                if (n1 != n2) 
+                {
+                    _graphService.AddEdge(n1.Id, n2.Id); 
+                }
+            }
+
+            DrawGraph();
+            LstTop5.ItemsSource = _algoService.GetTop5Users(_graphService);
+            MessageBox.Show("50 Rastgele Kullanıcı ve Bağlantılar Eklendi!\nŞimdi algoritmaların hızını test edebilirsin.");
+        }
+
+        
+        private void BtnAStar_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null || _firstSelected == null || _secondSelected == null)
+            {
+                 MessageBox.Show("Lütfen iki kişi seçin."); return;
+            }
+
+            
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
+            var path = _algoService.FindPathAStar(_graphService, _firstSelected, _secondSelected);
+            
+            sw.Stop(); 
+
+            if (path == null) { MessageBox.Show("Yol bulunamadı."); return; }
+
+            DrawGraph();
+            HighlightSelection();
+            
+            foreach (var node in path)
+                foreach (var child in MainCanvas.Children)
+                    if (child is Ellipse el && el.Tag == node) el.Fill = Brushes.MediumPurple;
+
+            MessageBox.Show($"A* Yolu Bulundu!\nAdım Sayısı: {path.Count - 1}\n⏱️ Çalışma Süresi: {sw.Elapsed.TotalMilliseconds} ms");
+        }
+
+        private void BtnReport_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null) return;
+
+            string report = "SOSYAL AĞ ANALİZİ RAPORU\n========================\n\n";
+
+            report += "1. KOMŞULUK LİSTESİ\n-------------------\n";
+            foreach (var node in _graphService.Nodes.Values)
+            {
+                var neighbors = _graphService.Edges
+                    .Where(edge => edge.Source == node || edge.Target == node)
+                    .Select(edge => edge.Source == node ? edge.Target.Name : edge.Source.Name)
+                    .ToList();
+                
+                report += $"{node.Name} -> {string.Join(", ", neighbors)}\n";
+            }
+
+            report += "\n2. BOYAMA TABLOSU (Welsh-Powell)\n--------------------------------\n";
+            WelshPowell wp = new WelshPowell();
+            var colors = wp.ColorGraph(_graphService);
+            foreach(var item in colors)
+            {
+                report += $"{item.Key.Name}: {item.Value}\n";
+            }
+
+            string path = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "AnalizRaporu.txt");
+            System.IO.File.WriteAllText(path, report);
+
+            MessageBox.Show($"Rapor oluşturuldu!\nKonum: {path}\n\nİçerik:\n- Komşuluk Listesi\n- Boyama Sonuçları");
+            
+            try { System.Diagnostics.Process.Start("notepad.exe", path); } catch {}
+        }
     }
 }

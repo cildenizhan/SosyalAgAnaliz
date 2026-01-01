@@ -184,5 +184,63 @@ namespace SocialNetworkAnalysis.Services
             }
             return neighbors;
         }
+        
+        public List<Node>? FindPathAStar(IGraphService graph, Node start, Node end)
+        {
+            var distances = new Dictionary<Node, double>();
+            var previous = new Dictionary<Node, Node>();
+            var openSet = new List<Node>(); 
+
+            foreach (var node in graph.Nodes.Values)
+                distances[node] = double.MaxValue;
+
+            distances[start] = 0;
+            openSet.Add(start);
+
+            while (openSet.Count > 0)
+            {
+                
+                openSet.Sort((a, b) => 
+                {
+                    double fA = distances[a] + CalculateHeuristic(a, end);
+                    double fB = distances[b] + CalculateHeuristic(b, end);
+                    return fA.CompareTo(fB);
+                });
+
+                var current = openSet[0];
+                openSet.Remove(current);
+
+                if (current == end) break;
+
+                foreach (var neighbor in GetNeighbors(graph, current))
+                {
+                    
+                    double weight = CalculateDynamicWeight(current, neighbor); 
+
+                    double newDist = distances[current] + weight;
+                    if (newDist < distances[neighbor])
+                    {
+                        distances[neighbor] = newDist;
+                        previous[neighbor] = current;
+                        if (!openSet.Contains(neighbor)) openSet.Add(neighbor);
+                    }
+                }
+            }
+            return ReconstructPath(previous, start, end);
+        }
+
+       
+        private double CalculateHeuristic(Node a, Node b)
+        {
+            return Math.Sqrt(Math.Pow(a.X - b.X, 2) + Math.Pow(a.Y - b.Y, 2));
+        }
+        private double CalculateDynamicWeight(Node current, Node neighbor)
+        {
+             double diffActivity = Math.Pow(current.Activity - neighbor.Activity, 2);
+             double diffInteraction = Math.Pow(current.Interaction - neighbor.Interaction, 2);
+             double diffConnections = Math.Pow(current.ConnectionCount - neighbor.ConnectionCount, 2);
+             double denominator = 1.0 + Math.Sqrt(diffActivity + diffInteraction + diffConnections);
+             return 1.0 / denominator;
+        }
     }
 }

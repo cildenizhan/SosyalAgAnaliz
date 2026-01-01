@@ -95,6 +95,9 @@
                     <Button Grid.Column="0" Content="💾 Kaydet (JSON)" Click="BtnSave_Click" Margin="0,0,2,0" Padding="5" Background="#87CEFA"/>
                     <Button Grid.Column="1" Content="📂 Yükle (JSON)" Click="BtnLoad_Click" Margin="2,0,0,0" Padding="5" Background="#87CEFA"/>
                 </Grid>
+                <Button Content="⚡ Test Verisi (50 Kişi)" Click="BtnRandomTest_Click" Background="LightYellow" Margin="0,5"/>
+<Button Content="📝 Rapor Al (TXT)" Click="BtnReport_Click" Background="LightGray" Margin="0,5"/>
+<Button Content="⭐ A* Algoritması" Click="BtnAStar_Click" Background="#FFD1DC" Margin="0,5"/>
                 
                 <TextBlock Text="" Height="20"/>
             </StackPanel>
