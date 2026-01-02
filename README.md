@@ -302,5 +302,87 @@ Kullanıcının etkileşime geçtiği WPF penceresidir.
 
 * **MainWindow.xaml.cs:** Kullanıcıdan gelen tıklama (Click), sürükle-bırak (Drag&Drop) ve sağ tık olaylarını yakalar. İlgili servisleri çağırır ve sonuçları Canvas üzerinde çizerek görselleştirir.
 
+## 5. Uygulama Özellikleri, Ekran Görüntüleri ve Test Sonuçları
+
+Bu bölümde, geliştirilen yazılımın kullanıcı arayüzü yetenekleri, görselleştirme modülleri ve algoritmaların performans testleri sunulmuştur.
+
+### 5.1. Uygulama Yetenekleri
+Uygulama, kullanıcı dostu bir deneyim sunmak amacıyla 4 temel modül üzerine inşa edilmiştir:
+
+#### A. Görselleştirme ve Etkileşim Modülü
+* **Drag & Drop (Sürükle-Bırak):** Kullanıcılar, Canvas üzerindeki düğümleri (kişileri) fare ile tutup istedikleri yere taşıyabilirler. Bağlantı çizgileri (Edges) dinamik olarak düğümleri takip eder.
+* **Sağ Tık Menüsü:** Haritada boş bir alana sağ tıklandığında, o koordinata yeni bir düğüm eklenir.
+* **Dinamik Çizim:** Algoritma sonuçları (yollar, boyamalar) anlık olarak renk kodlarıyla (Yeşil, Mor, Turuncu vb.) güncellenir.
+
+#### B. Düzenleme (Edit) Modülü
+* **Kişi Ekle/Sil:** Arayüz üzerinden veya sağ tık ile ağa yeni kişiler eklenebilir, seçili kişiler silinebilir.
+* **Bağlantı Kur/Kopar:** Seçilen iki düğüm arasına `Bağla` butonu ile ilişki kurulabilir veya mevcut ilişki `Kopar` butonu ile silinebilir.
+* **Self-Loop Engeli:** Bir düğümün kendine bağlanması engellenmiştir (Hata Yönetimi).
+
+#### C. Dosya İşlemleri (I/O)
+* **CSV'den Veri Okuma:** Uygulama açılışta `data.csv` dosyasını otomatik okur ve grafı oluşturur.
+* **JSON Kaydetme/Yükleme:** Projenin o anki durumu (düğümlerin konumları dahil) JSON formatında dışa aktarılabilir ve tekrar içeri alınabilir.
+
+#### D. Analiz ve Raporlama
+* **Metin Raporu:** "Rapor Al" butonu ile ağın komşuluk matrisi ve renklendirme sonuçları `.txt` dosyası olarak üretilir.
+* **Hassas Ölçüm:** Algoritmaların çalışma süreleri `Stopwatch` kullanılarak milisaniye ve işlemci tiki (Ticks) cinsinden ölçülür.
+
+### 5.2. Uygulama Ekran Görüntüleri
+
+Aşağıda uygulamanın çalışma anındaki genel görünümü ve analiz sonuçları yer almaktadır.
+
+**Şekil 1:** Uygulama Ana Ekranı ve Algoritma Kontrol Paneli
+<img width="1918" height="1012" alt="AnaEkran1" src="https://github.com/user-attachments/assets/f44f0fd0-2605-40a4-abc4-6987a1675187" />
+<img width="1918" height="1016" alt="AnaEkran2" src="https://github.com/user-attachments/assets/7e88dd81-d6a7-49a8-ae88-39b1f2d756b2" />
+
+
+### 5.3. Test Senaryoları ve Performans Analizi
+
+Proje isterlerinde belirtildiği üzere, algoritmaların başarımı iki farklı senaryo üzerinde test edilmiştir:
+1.  **Küçük Ölçekli Graf:** 15 Düğüm ve ~25 Kenar (Manuel oluşturulmuş).
+2.  **Orta Ölçekli Graf:** 50 Düğüm ve ~150 Kenar (Otomatik test verisi ile oluşturulmuş).
+
+Her iki senaryoda da algoritmaların **çalışma süreleri (Milisaniye ve Ticks)** ölçülmüş ve doğrulukları test edilmiştir.
+
+#### Performans Karşılaştırma Tablosu
+
+Aşağıdaki tablo, aynı donanım üzerinde (AMD Ryzen 7 CPU, 16GB RAM) yapılan ölçümlerin ortalamasını göstermektedir:
+
+| Algoritma | İşlem Türü | Küçük Ölçek (15 Düğüm) | Orta Ölçek (50 Düğüm) | 
+| :--- | :--- | :---: | :---: |
+| **BFS (Tarama)** | Tüm ağı gezme | **0.0409 ms** | **0.0933 ms** |
+| **DFS (Tarama)** | Derinlemesine inme | **0.0235 ms** | **0.0977 ms** |
+| **Dijkstra** | En kısa yol bulma | **1.3142 ms** | **0.3864 ms** |
+| **A* (A-Star)** | Heuristic yol bulma | **0.7024 ms** | **0.7095 ms** |
+| **Renklendirme** | Welsh-Powell | **0.1809 ms** | **0.3022 ms** |
+| **Ayrık Gruplar** | Component Analizi | **0.2072 ms** | **0.2898 ms** |
+
+#### Sonuçların Yorumlanması ve Analiz
+
+Yapılan testler sonucunda elde edilen veriler şu şekilde yorumlanmıştır:
+
+1.  **Tarama Algoritmaları (BFS & DFS):**
+    * BFS ve DFS algoritmaları, veri boyutu 3 katına çıkmasına rağmen (15 -> 50 düğüm), süreleri **0.1 ms'nin altında** kalarak lineer ($O(V+E)$) bir artış göstermiştir. Bu, algoritmaların büyük verilerde bile performans sorunu yaşatmayacağını kanıtlar.
+
+2.  **En Kısa Yol (Dijkstra vs A):**
+    * **Dijkstra:** İlk çalıştırmada (Küçük Test) 1.3 ms ölçülmüş, ancak sistem önbelleği dolduktan sonra 50 düğümlü daha karmaşık bir yapıda **0.38 ms** gibi çok daha iyi bir süreye düşmüştür.
+    * **A* Algoritması:** Graf boyutu büyüse bile sürenin neredeyse sabit kaldığı (**0.70 ms -> 0.71 ms**) gözlemlenmiştir. Bu durum, A*'ın kullandığı **Heuristic (Sezgisel)** yaklaşımın, graf büyüdükçe arama uzayını başarıyla daralttığını ve performansı koruduğunu gösterir.
+
+3.  **Analiz Algoritmaları (Renklendirme & Gruplama):**
+    * Welsh-Powell algoritması, düğümleri dereceye göre sıralama maliyetine ($O(V \log V)$) sahip olmasına rağmen, 50 düğümlü bir ağda **0.30 ms** gibi fark edilemeyecek kadar kısa bir sürede tamamlanmıştır.
+
+**Genel Sonuç:** Uygulama, 50-100 düğümlü graflarda dahi **1 milisaniyenin altında** tepki süreleri vererek, hedeflenen yüksek performans kriterlerini başarıyla sağlamıştır.
+
+#### Test Görselleri
+
+**Şekil 2:** Küçük Ölçekli (15 Düğüm) Test Senaryosu ve Renklendirme Sonucu
+
+<img width="1918" height="1017" alt="KucukRenklendirme" src="https://github.com/user-attachments/assets/23ea43c9-3546-4923-bbd9-b7d5016826eb" />
+
+
+**Şekil 3:** Orta Ölçekli (50 Düğüm) Test Senaryosu ve Dijkstra Algoritması Sonucu
+
+<img width="1918" height="1023" alt="BuyukDijk" src="https://github.com/user-attachments/assets/362a8ea6-f916-44c7-a22d-6528f2e2ecf7" />
+
 
 
