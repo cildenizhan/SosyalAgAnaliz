@@ -1,4 +1,4 @@
-# 🕸️ Sosyal Ağ Analizi ve Görselleştirme Aracı (SNA Tool)
+# Sosyal Ağ Analizi ve Görselleştirme Aracı (SNA Tool)
 
 **Ders:** Yazılım Laboratuvarı I  
 **2025-2026 Güz Dönemi** 
@@ -30,19 +30,19 @@ Bu bölümde; `AlgorithmService.cs` ve `WelshPowell.cs` sınıflarında kodlanan
 
 ### 3.1. Breadth-First Search (BFS) - Genişlik Öncelikli Arama
 
-#### 📚 Literatür ve Tanım
+#### Literatür ve Tanım
 BFS, 1959 yılında **Edward F. Moore** tarafından labirentlerde en kısa yolu bulmak için geliştirilmiş temel bir çizge tarama algoritmasıdır. Algoritma, başlangıç düğümünden başlayarak önce tüm komşularını, sonra o komşuların komşularını ziyaret ederek "halka halka" genişler.
 
-#### ⚙️ Projedeki Çalışma Mantığı
+#### Projedeki Çalışma Mantığı
 Projede BFS, iki farklı amaçla kullanılmıştır:
 1.  **Ağ Tarama:** Bir kullanıcıdan başlayarak erişilebilen tüm kullanıcı ağını keşfetmek (`FindShortestPath` metodunun temelinde ve tarama fonksiyonunda).
 2.  **Veri Yapısı:** `Queue` (FIFO - İlk Giren İlk Çıkar) yapısı kullanılarak düğümler sırayla işlenir.
 
-#### 🧮 Karmaşıklık Analizi
+#### Karmaşıklık Analizi
 * **Zaman Karmaşıklığı:** $O(V + E)$ (V: Düğüm, E: Kenar sayısı).
 * **Alan Karmaşıklığı:** $O(V)$ (Kuyrukta tutulan düğümler).
 
-#### 🔄 Akış Diyagramı (Mermaid)
+#### Akış Diyagramı (Mermaid)
 
 ```mermaid
 flowchart TD
