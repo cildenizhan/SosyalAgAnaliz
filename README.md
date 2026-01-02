@@ -1,7 +1,7 @@
 # 🕸️ Sosyal Ağ Analizi ve Görselleştirme Aracı (SNA Tool)
 
 **Ders:** Yazılım Laboratuvarı I  
-**Tarih:** Ocak 2026  
+**2025-2026 Güz Dönemi** 
 
 ### 👥 Ekip Üyeleri
 * **[Denizhan Çil]** - [231307104]
@@ -55,3 +55,136 @@ flowchart TD
     CheckVis -- Hayır --> Enqueue[Ziyaret Et ve Kuyruğa Ekle]
     Enqueue --> CheckQ
     CheckVis -- Evet --> CheckQ
+```
+### 3.2. Depth-First Search (DFS) - Derinlik Öncelikli Arama
+
+#### Literatür ve Tanım
+DFS'in kökeni 19. yüzyılda Charles Pierre Trémaux'ya dayanır. Algoritma, bir düğümden başlayarak bir dal boyunca gidebileceği en son noktaya kadar ilerler, gidilecek yer kalmadığında geri döner (Backtracking).
+
+#### Projedeki Çalışma Mantığı
+Projede DFS, özellikle Bağlı Bileşenlerin (Connected Components) ve ayrık toplulukların tespiti için kullanılmıştır (FindConnectedComponents ve DFS metotları).
+
+* **Veri Yapısı:** Stack (LIFO - Son Giren İlk Çıkar) kullanılarak derinlemesine arama yapılır.
+
+* Ziyaret edilen düğümler HashSet içinde tutularak döngüler (cycles) engellenir.
+
+#### Karmaşıklık Analizi
+* **Zaman Karmaşıklığı:** $O(V + E)$.
+* **Alan Karmaşıklığı:** $O(V)$ (Stack derinliği).
+
+#### Akış Diyagramı (Mermaid)
+
+```mermaid
+flowchart TD
+    Start([Başla]) --> StackInit[Stack Oluştur ve Başlangıcı Ekle]
+    StackInit --> CheckStack{Stack Boş mu?}
+    CheckStack -- Evet --> End([Bitir])
+    CheckStack -- Hayır --> Pop["Düğümü Çıkar (Pop)"]
+    Pop --> Visited{Ziyaret Edildi mi?}
+    Visited -- Hayır --> Process[İşaretle ve Listeye Ekle]
+    Process --> Push[Komşuları Stack'e Ekle]
+    Push --> CheckStack
+    Visited -- Evet --> CheckStack
+```
+
+### 3.3. Dijkstra En Kısa Yol Algoritması (Dinamik Ağırlıklı)
+
+#### Literatür ve Tanım
+Edsger W. Dijkstra tarafından 1956'da geliştirilen bu algoritma, negatif ağırlığı olmayan graflarda en kısa yolu bulur. Greedy (Açgözlü) bir yaklaşım sergiler.
+
+#### Projedeki Çalışma Mantığı (Önemli)
+Bu projede kenarların ağırlıkları (maliyetleri) sabit değildir. İki kullanıcı arasındaki Benzerlik Oranı arttıkça aralarındaki mesafe (maliyet) azalır. AlgorithmService.cs içindeki formül şöyledir:
+
+$$ Payda = 1.0 + \sqrt{(Act_1 - Act_2)^2 + (Int_1 - Int_2)^2 + (Conn_1 - Conn_2)^2} $$ $$ Ağırlık (Weight) = \frac{1}{Payda} $$
+
+* Bu sayede algoritma sadece "az düğüm" geçen yolu değil, "en benzer profilli" yolu tercih eder.
+
+#### Karmaşıklık Analizi
+* **Zaman Karmaşıklığı:** $O(E + V \log V)$ (Sıralama işlemiyle).
+* **Alan Karmaşıklığı:** $O(V)$.
+
+#### Akış Diyagramı (Mermaid)
+
+```mermaid
+flowchart TD
+    Start([Başla]) --> Init[Mesafeler = Sonsuz, Başlangıç = 0]
+    Init --> ListInit[Düğümleri Listeye Ekle]
+    ListInit --> CheckList{Liste Boş mu?}
+    CheckList -- Evet --> End([Yolu Döndür])
+    CheckList -- Hayır --> Sort[Listeyi Mesafeye Göre Sırala]
+    Sort --> Min["En Küçük Mesafeli Düğümü (u) Seç"]
+    Min --> Neigh["Komşuları (v) Gez"]
+    Neigh --> CalcWeight[Dinamik Ağırlık Hesapla]
+    CalcWeight --> Relax{Yeni Yol < Mevcut Yol?}
+    Relax -- Evet --> Update["Mesafe(v) Güncelle, Önceki(v) = u"]
+    Update --> CheckList
+    Relax -- Hayır --> CheckList
+```
+
+### 3.4. A* (A-Star) Algoritması
+
+#### Literatür ve Tanım
+1968'de Hart, Nilsson ve Raphael tarafından geliştirilen A*, Dijkstra'nın "sezgisel" (heuristic) versiyonudur. Hedefe ne kadar yol kaldığını tahmin ederek aramayı yönlendirir.
+
+#### Projedeki Çalışma Mantığı
+Algoritma $f(n) = g(n) + h(n)$ formülünü kullanır:
+* **$g(n)$:** Başlangıçtan gelen maliyet (Dijkstra'daki dinamik ağırlık formülüyle aynı).
+* **$h(n)$ (Heuristic):** Düğümlerin Canvas üzerindeki koordinatları kullanılarak hesaplanan Öklid Mesafesi (Euclidean Distance).
+Formül şu şekildedir:
+
+$$
+h(n) = \sqrt{(X_1 - X_2)^2 + (Y_1 - Y_2)^2}
+$$
+Bu sayede algoritma, harita üzerinde hedefe coğrafi olarak yakın olan düğümleri önceliklendirir ve Dijkstra'dan daha hızlı sonuç verir.
+
+#### Akış Diyagramı (Mermaid)
+
+```mermaid
+flowchart TD
+    Start([Başla]) --> Init[Açık Liste Oluştur]
+    Init --> CalcF["Başlangıç için f = g + h Hesapla"]
+    CalcF --> CheckList{Açık Liste Boş mu?}
+    CheckList -- Evet --> Fail([Yol Bulunamadı])
+    CheckList -- Hayır --> Select["En Düşük f Değerli Düğümü Seç"]
+    Select --> IsTarget{Hedef Düğüm mü?}
+    IsTarget -- Evet --> Success([Yolu Geriye Doğru Oluştur])
+    IsTarget -- Hayır --> Expand["Komşuları Gez"]
+    Expand --> CalcGH["g (Dinamik) ve h (Öklid) Hesapla"]
+    CalcGH --> BetterPath{Daha İyi Bir Yol mu?}
+    BetterPath -- Evet --> Update["g, f Değerlerini ve Ebeveyni Güncelle"]
+    Update --> CheckList
+    BetterPath -- Hayır --> CheckList
+```
+
+### 3.5. Welsh-Powell Renklendirme Algoritması
+
+#### Literatür ve Tanım
+Welsh ve Powell (1967) tarafından geliştirilen bu algoritma, çizge renklendirme problemlerinde kullanılan etkili bir yöntemdir. Amaç, komşu düğümlerin aynı renge sahip olmamasını sağlamaktır (Kromatik Sayı Problemi).
+
+#### Projedeki Çalışma Mantığı (WelshPowell.cs)
+1. **Sıralama:** Düğümler, bağlantı sayılarına (derece) göre büyükten küçüğe sıralanır.
+
+2. **Renk Seçimi:** İlk renk seçilir (Örn: Kırmızı).
+
+3. **Boyama:** Listeden sıradaki düğüm boyanır. Daha sonra, bu düğüme komşu olmayan diğer düğümler de aynı renge boyanır.
+
+4. **Tekrar:** Boyanmamış düğüm kalmayana kadar bir sonraki renge geçilerek işlem tekrarlanır.
+
+#### Karmaşıklık Analizi
+* **Zaman Karmaşıklığı:** $O(V^2)$ (En kötü durumda tüm düğüm çiftleri kontrol edilir).
+
+#### Akış Diyagramı (Mermaid)
+
+```mermaid
+flowchart TD
+    Start([Başla]) --> Sort[Düğümleri Dereceye Göre Azalan Sırada Diz]
+    Sort --> PickColor[Sıradaki Rengi Seç]
+    PickColor --> CheckRem{Boyanmamış Düğüm Kaldı mı?}
+    CheckRem -- Hayır --> End([Bitir])
+    CheckRem -- Evet --> Select[En Yüksek Dereceli Düğümü Seç]
+    Select --> Paint[Renge Boya]
+    Paint --> FindNon[Komşu Olmayanları Bul]
+    FindNon --> PaintOthers[Onları da Aynı Renge Boya]
+    PaintOthers --> NextColor[Sonraki Renge Geç]
+    NextColor --> CheckRem
+```
