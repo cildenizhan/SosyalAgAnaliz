@@ -682,6 +682,7 @@ namespace SocialNetworkAnalysis
         }
 
         
+        
         private void BtnAStar_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null || _secondSelected == null)
@@ -700,9 +701,29 @@ namespace SocialNetworkAnalysis
             DrawGraph();
             HighlightSelection();
             
+            
             foreach (var node in path)
                 foreach (var child in MainCanvas.Children)
                     if (child is Ellipse el && el.Tag == node) el.Fill = Brushes.MediumPurple;
+
+            
+            for (int i = 0; i < path.Count - 1; i++)
+            {
+                var u1 = path[i];
+                var u2 = path[i + 1];
+                foreach (var child in MainCanvas.Children)
+                {
+                    if (child is Line line && line.Tag is Edge edge)
+                    {
+                        
+                        if ((edge.Source == u1 && edge.Target == u2) || (edge.Source == u2 && edge.Target == u1))
+                        {
+                            line.Stroke = Brushes.MediumPurple; 
+                            line.StrokeThickness = 5;       
+                        }
+                    }
+                }
+            }
 
             MessageBox.Show($"A* Yolu Bulundu!\n" +
                             $"Adım Sayısı: {path.Count - 1}\n" +
