@@ -188,3 +188,119 @@ flowchart TD
     PaintOthers --> NextColor[Sonraki Renge Geç]
     NextColor --> CheckRem
 ```
+
+## 4. Yazılım Mimarisi ve Sınıf Yapısı
+
+Proje, **Nesne Yönelimli Programlama (OOP)** prensiplerine uygun olarak tasarlanmış olup **Katmanlı Mimari (Layered Architecture)** yapısını benimsemektedir. Veri yönetimi, iş mantığı (algoritmalar) ve kullanıcı arayüzü birbirinden bağımsız modüller halinde geliştirilmiştir.
+
+### 4.1. Sınıf Diyagramı (UML Class Diagram)
+
+Aşağıdaki diyagramda sistemdeki sınıflar, arayüzler ve aralarındaki ilişkiler Mermaid ile görselleştirilmiştir:
+
+```mermaid
+classDiagram
+    %% Modeller
+    class Node {
+        +int Id
+        +string Name
+        +double Activity
+        +double X
+        +double Y
+    }
+
+    class Edge {
+        +Node Source
+        +Node Target
+        +double Weight
+    }
+
+    class Graph {
+        +Dictionary Nodes
+        +List Edges
+    }
+
+    %% Servisler (Senin kod yapın burası)
+    class IGraphService {
+        <<interface>>
+        +AddNode()
+        +RemoveNode()
+        +AddEdge()
+    }
+
+    class GraphService {
+        +Graph GraphModel
+        +AddNode()
+        +RemoveNode()
+    }
+
+    %% DİKKAT: Senin kodunda algoritmalar ayrı class değil, METOT'tur.
+    %% Bu yüzden hepsi AlgorithmService içinde gösterilmelidir.
+    class AlgorithmService {
+        +BFS(graph, start)
+        +DFS(graph, start)
+        +FindPathDijkstra(graph, start, end)
+        +FindPathAStar(graph, start, end)
+        +FindConnectedComponents(graph)
+    }
+
+    class WelshPowell {
+        +ColorGraph(graph)
+    }
+
+    class FileService {
+        +LoadGraph()
+        +SaveGraphJson()
+    }
+
+    class MainWindow {
+        -AlgorithmService _algoService
+        +BtnClickEvents()
+    }
+
+    %% İlişkiler
+    GraphService ..|> IGraphService : Uygular
+    GraphService *-- Graph : Sahiptir
+    Graph *-- Node : İçerir
+    Graph *-- Edge : İçerir
+    
+    %% AlgorithmService, WelshPowell'i kullanıyor
+    AlgorithmService ..> WelshPowell : Kullanır
+    
+    %% Ana ekran servisleri kullanıyor
+    MainWindow --> IGraphService : Yönetir
+    MainWindow --> AlgorithmService : Çalıştırır
+    MainWindow --> FileService : Dosya İşlemleri
+```
+
+### 4.2. Modüllerin ve Sınıfların İşlevleri
+Proje temel olarak 3 ana katmandan oluşmaktadır:
+
+#### A. Veri Katmanı (Models)
+Sistemin temel yapı taşlarını oluşturur. Veritabanı kullanılmadığı için veriler bellekte (In-Memory) nesneler olarak tutulur.
+
+* **Node (Düğüm):** Sosyal ağdaki her bir kullanıcıyı temsil eder. Kullanıcının Id, Name gibi kimlik bilgilerini; Activity, Interaction gibi analiz parametrelerini ve Canvas üzerindeki X, Y koordinatlarını tutar.
+
+* **Edge (Kenar):** İki düğüm arasındaki bağlantıyı temsil eder. Source (Kaynak) ve Target (Hedef) düğümlerini tutar. Ayrıca dinamik hesaplanan Weight (Ağırlık) bilgisini barındırır.
+
+* **Graph:** Tüm düğüm ve kenar listelerini tek bir çatı altında toplayan taşıyıcı sınıftır.
+
+
+#### B. İş Mantığı Katmanı (Services)
+Uygulamanın beyni olarak çalışan, algoritmaların ve veri yönetiminin yapıldığı katmandır.
+
+* **GraphService:** Graf üzerindeki temel CRUD (Ekle, Sil, Güncelle) işlemlerini yönetir. IGraphService arayüzünü uygulayarak bağımlılığı azaltır (Dependency Injection prensibine hazırlık). Self-loop (kendine bağlantı) gibi hatalı verileri burada engeller.
+
+* **AlgorithmService:** Projenin en karmaşık sınıfıdır. BFS, DFS, Dijkstra, A* gibi tüm yol bulma ve tarama algoritmalarını içerir. UI katmanından bağımsızdır; sadece veri alır ve sonuç döndürür.
+
+* **WelshPowell:** Graf renklendirme algoritmasını içeren yardımcı sınıftır. Ayrık toplulukların görselleştirilmesi için her düğüme bir renk atar.
+
+* **FileService:** Verilerin kalıcılığını sağlar. JSON formatında tüm ağ yapısını kaydeder/yükler ve başlangıç verilerini CSV dosyasından okur (Parsing işlemleri).
+
+
+#### C. Sunum Katmanı (UI - MainWindow)
+Kullanıcının etkileşime geçtiği WPF penceresidir.
+
+* **MainWindow.xaml.cs:** Kullanıcıdan gelen tıklama (Click), sürükle-bırak (Drag&Drop) ve sağ tık olaylarını yakalar. İlgili servisleri çağırır ve sonuçları Canvas üzerinde çizerek görselleştirir.
+
+
+
