@@ -3,9 +3,9 @@
 **Ders:** Yazılım Laboratuvarı I  
 **2025-2026 Güz Dönemi** 
 
-### 👥 Ekip Üyeleri
-* **[Denizhan Çil]** - [231307104]
-* **[Meliha Damla Coşkun]** - [231307113]
+### Ekip Üyeleri
+* **Denizhan Çil** - [231307104]
+* **Meliha Damla Coşkun** - [231307113]
 
 ---
 
