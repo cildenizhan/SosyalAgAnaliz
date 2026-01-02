@@ -385,4 +385,27 @@ Yapılan testler sonucunda elde edilen veriler şu şekilde yorumlanmıştır:
 <img width="1918" height="1023" alt="BuyukDijk" src="https://github.com/user-attachments/assets/362a8ea6-f916-44c7-a22d-6528f2e2ecf7" />
 
 
+## 6. Sonuç ve Tartışma
+
+### 6.1. Proje Çıktıları ve Elde Edilen Başarılar
+Bu proje kapsamında, Yazılım Laboratuvarı I dersi gereksinimlerini tam olarak karşılayan, genişletilebilir ve yüksek performanslı bir **Sosyal Ağ Analizi (SNA)** aracı geliştirilmiştir.
+* **Algoritmik Başarı:** İstenen BFS, DFS, Dijkstra, A* ve Welsh-Powell algoritmaları eksiksiz entegre edilmiş ve doğrulukları test edilmiştir. Özellikle A* algoritması, Heuristic yaklaşım sayesinde Dijkstra'ya kıyasla işlem maliyetini düşürmüştür.
+* **Yüksek Performans:** 50-100 düğümlü testlerde, tüm algoritmaların **1 milisaniyenin altında** sonuç verdiği `Stopwatch` ölçümleriyle kanıtlanmıştır.
+* **Kullanıcı Deneyimi (UX):** Standart form uygulamalarının ötesine geçilerek; düğümlerin fare ile sürüklenebildiği (Drag & Drop), bağlantıların dinamik olarak esnediği interaktif bir görselleştirme ortamı sunulmuştur.
+* **Mimari Tasarım:** Proje, "Spagetti Kod" yapısından uzak durularak; `Service-Based` (Servis Tabanlı) ve katmanlı bir mimari ile geliştirilmiştir. Bu sayede projeye yeni bir özellik eklemek (örn: Prim Algoritması), mevcut kodu bozmadan mümkündür.
+
+### 6.2. Sınırlılıklar ve Karşılaşılan Zorluklar
+Geliştirme sürecinde ve test aşamalarında tespit edilen bazı kısıtlar şunlardır:
+* **Görsel Karmaşa:** Düğüm sayısı 100'ün üzerine çıktığında, bağlantı çizgileri (Edges) birbirini kestiği için görsel takip zorlaşmaktadır.
+* **Veri Kalıcılığı:** Proje şu an için verileri JSON dosyalarında tutmaktadır. Çok büyük verilerde (10.000+ düğüm) dosya okuma/yazma performansı düşebilir.
+* **2D Sınırlılığı:** Karmaşık ağ yapılarını 2 boyutlu düzlemde göstermek, bazı topolojik özelliklerin (derinlik gibi) anlaşılmasını zorlaştırmaktadır.
+
+### 6.3. Gelecek Çalışmalar ve Öneriler
+Projenin bir sonraki fazında şu geliştirmelerin yapılması önerilmektedir:
+1.  **Veritabanı Entegrasyonu:** Verilerin RAM yerine PostgreSQL gibi graf destekli bir veritabanında tutulması.
+2.  **Force-Directed Layout:** Düğümlerin rastgele değil, fizik kurallarına göre (birbirini iten/çeken) otomatik yerleştiği bir algoritma eklenmesi (Görsel karmaşayı çözmek için).
+3.  **3D Görselleştirme:** Unity veya Three.js kullanılarak ağ yapısının 3 boyutlu uzayda incelenmesi.
+4.  **Gerçek Veri Entegrasyonu:** Twitter (X) veya LinkedIn API'leri bağlanarak gerçek sosyal medya verilerinin analiz edilmesi.
+
+
 
