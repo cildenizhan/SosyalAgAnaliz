@@ -58,7 +58,9 @@
                     </ListView.View>
                 </ListView>
 
-                <Button x:Name="BtnDFS" Content="🔍 DFS ile Tara (Tümünü Bul)" Click="BtnDFS_Click" Padding="5" Background="#E6E6FA" Margin="0,10,0,0"/>
+                
+            <Button x:Name="BtnDFS" Content="🔍 DFS ile Tara (Tümünü Bul)" Click="BtnDFS_Click" Padding="5" Background="#E6E6FA" Margin="0,10,0,0"/>
+                <Button x:Name="BtnBFS" Content="📡 BFS ile Tara (Genişle)" Click="BtnBFS_Click" Padding="5" Background="#E0FFFF" Margin="0,5,0,0"/>
                 <Button x:Name="BtnComponents" Content="🧩 Ayrık Grupları Bul" Click="BtnComponents_Click" Padding="5" Background="#FFDAB9" Margin="0,5,0,0"/>
                 
                 <Separator Margin="0,10"/>

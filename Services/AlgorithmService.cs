@@ -242,5 +242,31 @@ namespace SocialNetworkAnalysis.Services
              double denominator = 1.0 + Math.Sqrt(diffActivity + diffInteraction + diffConnections);
              return 1.0 / denominator;
         }
+        // YENİ: BFS Algoritması (Genişlik Öncelikli Tarama)
+        public List<Node> BFS(IGraphService graph, Node start)
+        {
+            var visited = new HashSet<Node>();
+            var queue = new Queue<Node>();
+            var result = new List<Node>();
+
+            queue.Enqueue(start);
+            visited.Add(start);
+
+            while (queue.Count > 0)
+            {
+                var current = queue.Dequeue();
+                result.Add(current);
+
+                foreach (var neighbor in GetNeighbors(graph, current))
+                {
+                    if (!visited.Contains(neighbor))
+                    {
+                        visited.Add(neighbor);
+                        queue.Enqueue(neighbor);
+                    }
+                }
+            }
+            return result;
+        }
     }
 }

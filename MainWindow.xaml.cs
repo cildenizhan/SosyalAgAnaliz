@@ -43,13 +43,9 @@ namespace SocialNetworkAnalysis
             string finalPath = "";
 
             if (System.IO.File.Exists(System.IO.Path.Combine(basePath, fileName)))
-            {
                 finalPath = System.IO.Path.Combine(basePath, fileName);
-            }
             else if (System.IO.File.Exists(System.IO.Path.Combine(projectPath, fileName)))
-            {
                 finalPath = System.IO.Path.Combine(projectPath, fileName);
-            }
 
             if (string.IsNullOrEmpty(finalPath)) return;
 
@@ -299,6 +295,8 @@ namespace SocialNetworkAnalysis
             }
         }
 
+        // --- SÜRE ÖLÇÜMLÜ ALGORİTMALAR ---
+
         private void BtnFindPath_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null || _secondSelected == null)
@@ -342,6 +340,7 @@ namespace SocialNetworkAnalysis
             }
         }
 
+        // 1. DIJKSTRA (SÜRE ÖLÇÜMLÜ)
         private void BtnDijkstra_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null || _secondSelected == null)
@@ -350,7 +349,11 @@ namespace SocialNetworkAnalysis
                 return;
             }
 
+            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+
             var path = _algoService.FindPathDijkstra(_graphService, _firstSelected, _secondSelected);
+
+            sw.Stop(); // DURDUR
 
             if (path == null)
             {
@@ -362,10 +365,8 @@ namespace SocialNetworkAnalysis
             HighlightSelection();
 
             foreach (var node in path)
-            {
                 foreach (var child in MainCanvas.Children)
                     if (child is Ellipse el && el.Tag == node) el.Fill = Brushes.Orange;
-            }
 
             for (int i = 0; i < path.Count - 1; i++)
             {
@@ -383,7 +384,12 @@ namespace SocialNetworkAnalysis
                     }
                 }
             }
-            MessageBox.Show($"Dijkstra (Mesafe) Yolu Bulundu!\nAdım Sayısı: {path.Count - 1}");
+            
+            MessageBox.Show($"Dijkstra En Kısa Yol Bulundu!\n" +
+                            $"Adım Sayısı: {path.Count - 1}\n" +
+                            $"----------------------------------\n" +
+                            $"⏱️ Süre: {sw.Elapsed.TotalMilliseconds} ms\n" +
+                            $"⚡ Ticks: {sw.ElapsedTicks}");
         }
 
         private void HighlightSelection()
@@ -397,11 +403,17 @@ namespace SocialNetworkAnalysis
             }
         }
 
+        // 2. RENKLENDİRME (SÜRE ÖLÇÜMLÜ)
         private void BtnColoring_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null) return;
+
+            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+
             WelshPowell wp = new WelshPowell();
             var colors = wp.ColorGraph(_graphService);
+
+            sw.Stop(); // DURDUR
 
             foreach (var child in MainCanvas.Children)
             {
@@ -419,9 +431,15 @@ namespace SocialNetworkAnalysis
                     if (child is Ellipse el && el.Tag == kvp.Key) el.Fill = brush;
                 }
             }
-            MessageBox.Show($"Renklendirme Tamamlandı!\nKullanılan Renk Sayısı: {usedColors.Count}");
+            
+            MessageBox.Show($"Renklendirme Tamamlandı!\n" +
+                            $"Kullanılan Renk Sayısı: {usedColors.Count}\n" +
+                            $"----------------------------------\n" +
+                            $"⏱️ Süre: {sw.Elapsed.TotalMilliseconds} ms\n" +
+                            $"⚡ Ticks: {sw.ElapsedTicks}");
         }
 
+        // 3. DFS (SÜRE ÖLÇÜMLÜ)
         private void BtnDFS_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null)
@@ -430,7 +448,12 @@ namespace SocialNetworkAnalysis
                 return;
             }
 
+            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+
             var visitedNodes = _algoService.DFS(_graphService, _firstSelected);
+
+            sw.Stop(); // DURDUR
+
             DrawGraph();
 
             foreach (var node in visitedNodes)
@@ -440,13 +463,59 @@ namespace SocialNetworkAnalysis
                     if (child is Ellipse el && el.Tag == node) el.Fill = Brushes.Purple; 
                 }
             }
-            MessageBox.Show($"DFS Tamamlandı!\nBu kişiden ulaşılabilen toplam kişi sayısı: {visitedNodes.Count}");
+            
+            MessageBox.Show($"DFS (Tümünü Bul) Tamamlandı!\n" +
+                            $"Erişilen Kişi: {visitedNodes.Count}\n" +
+                            $"----------------------------------\n" +
+                            $"⏱️ Süre: {sw.Elapsed.TotalMilliseconds} ms\n" +
+                            $"⚡ Ticks: {sw.ElapsedTicks}");
         }
 
+        // 4. BFS (SÜRE ÖLÇÜMLÜ)
+        private void BtnBFS_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graphService == null || _firstSelected == null)
+            {
+                MessageBox.Show("Lütfen haritadan başlangıç için bir kişi seçin!");
+                return;
+            }
+
+            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+
+            var visitedNodes = _algoService.BFS(_graphService, _firstSelected);
+
+            sw.Stop(); // DURDUR
+
+            DrawGraph();
+
+            foreach (var node in visitedNodes)
+            {
+                foreach (var child in MainCanvas.Children)
+                {
+                    if (child is Ellipse el && el.Tag == node) 
+                    {
+                        el.Fill = Brushes.Cyan; 
+                    }
+                }
+            }
+            
+            MessageBox.Show($"BFS (Genişle) Tamamlandı!\n" +
+                            $"Erişilen Kişi: {visitedNodes.Count}\n" +
+                            $"----------------------------------\n" +
+                            $"⏱️ Süre: {sw.Elapsed.TotalMilliseconds} ms\n" +
+                            $"⚡ Ticks: {sw.ElapsedTicks}");
+        }
+
+        // 5. COMPONENTS (SÜRE ÖLÇÜMLÜ)
         private void BtnComponents_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null) return;
+
+            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+
             var components = _algoService.FindConnectedComponents(_graphService);
+
+            sw.Stop(); // DURDUR
 
             foreach (var child in MainCanvas.Children)
             {
@@ -470,7 +539,12 @@ namespace SocialNetworkAnalysis
                 }
                 colorIndex++;
             }
-            MessageBox.Show($"Analiz Tamamlandı!\nToplam {components.Count} farklı grup (ayrık bileşen) bulundu.");
+            
+            MessageBox.Show($"Ayrık Gruplar Bulundu!\n" +
+                            $"Grup Sayısı: {components.Count}\n" +
+                            $"----------------------------------\n" +
+                            $"⏱️ Süre: {sw.Elapsed.TotalMilliseconds} ms\n" +
+                            $"⚡ Ticks: {sw.ElapsedTicks}");
         }
 
         private void BtnSave_Click(object sender, RoutedEventArgs e)
@@ -570,14 +644,11 @@ namespace SocialNetworkAnalysis
         private void BtnRandomTest_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null) return;
-            
-            
 
             Random rnd = new Random();
             int startId = _graphService.Nodes.Count + 1;
             int count = 50; 
 
-            
             for (int i = 0; i < count; i++)
             {
                 var node = new Node
@@ -593,7 +664,6 @@ namespace SocialNetworkAnalysis
                 _graphService.AddNode(node);
             }
 
-            
             var allNodes = _graphService.Nodes.Values.ToList();
             for (int i = 0; i < count * 2; i++) 
             {
@@ -611,7 +681,7 @@ namespace SocialNetworkAnalysis
             MessageBox.Show("50 Rastgele Kullanıcı ve Bağlantılar Eklendi!\nŞimdi algoritmaların hızını test edebilirsin.");
         }
 
-        
+        // 6. A* ALGORİTMASI (SÜRE ÖLÇÜMLÜ)
         private void BtnAStar_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null || _secondSelected == null)
@@ -619,13 +689,11 @@ namespace SocialNetworkAnalysis
                  MessageBox.Show("Lütfen iki kişi seçin."); return;
             }
 
-            
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
+            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
 
             var path = _algoService.FindPathAStar(_graphService, _firstSelected, _secondSelected);
             
-            sw.Stop(); 
+            sw.Stop(); // DURDUR
 
             if (path == null) { MessageBox.Show("Yol bulunamadı."); return; }
 
@@ -636,7 +704,11 @@ namespace SocialNetworkAnalysis
                 foreach (var child in MainCanvas.Children)
                     if (child is Ellipse el && el.Tag == node) el.Fill = Brushes.MediumPurple;
 
-            MessageBox.Show($"A* Yolu Bulundu!\nAdım Sayısı: {path.Count - 1}\n⏱️ Çalışma Süresi: {sw.Elapsed.TotalMilliseconds} ms");
+            MessageBox.Show($"A* Yolu Bulundu!\n" +
+                            $"Adım Sayısı: {path.Count - 1}\n" +
+                            $"----------------------------------\n" +
+                            $"⏱️ Süre: {sw.Elapsed.TotalMilliseconds} ms\n" +
+                            $"⚡ Ticks: {sw.ElapsedTicks}");
         }
 
         private void BtnReport_Click(object sender, RoutedEventArgs e)
