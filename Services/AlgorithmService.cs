@@ -242,7 +242,7 @@ namespace SocialNetworkAnalysis.Services
              double denominator = 1.0 + Math.Sqrt(diffActivity + diffInteraction + diffConnections);
              return 1.0 / denominator;
         }
-        // YENİ: BFS Algoritması (Genişlik Öncelikli Tarama)
+        
         public List<Node> BFS(IGraphService graph, Node start)
         {
             var visited = new HashSet<Node>();

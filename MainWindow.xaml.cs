@@ -295,7 +295,7 @@ namespace SocialNetworkAnalysis
             }
         }
 
-        // --- SÜRE ÖLÇÜMLÜ ALGORİTMALAR ---
+        
 
         private void BtnFindPath_Click(object sender, RoutedEventArgs e)
         {
@@ -340,7 +340,7 @@ namespace SocialNetworkAnalysis
             }
         }
 
-        // 1. DIJKSTRA (SÜRE ÖLÇÜMLÜ)
+        
         private void BtnDijkstra_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null || _secondSelected == null)
@@ -349,11 +349,11 @@ namespace SocialNetworkAnalysis
                 return;
             }
 
-            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+            var sw = System.Diagnostics.Stopwatch.StartNew(); 
 
             var path = _algoService.FindPathDijkstra(_graphService, _firstSelected, _secondSelected);
 
-            sw.Stop(); // DURDUR
+            sw.Stop(); 
 
             if (path == null)
             {
@@ -403,17 +403,17 @@ namespace SocialNetworkAnalysis
             }
         }
 
-        // 2. RENKLENDİRME (SÜRE ÖLÇÜMLÜ)
+        
         private void BtnColoring_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null) return;
 
-            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+            var sw = System.Diagnostics.Stopwatch.StartNew(); 
 
             WelshPowell wp = new WelshPowell();
             var colors = wp.ColorGraph(_graphService);
 
-            sw.Stop(); // DURDUR
+            sw.Stop(); 
 
             foreach (var child in MainCanvas.Children)
             {
@@ -439,7 +439,7 @@ namespace SocialNetworkAnalysis
                             $"⚡ Ticks: {sw.ElapsedTicks}");
         }
 
-        // 3. DFS (SÜRE ÖLÇÜMLÜ)
+        
         private void BtnDFS_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null)
@@ -448,11 +448,11 @@ namespace SocialNetworkAnalysis
                 return;
             }
 
-            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+            var sw = System.Diagnostics.Stopwatch.StartNew(); 
 
             var visitedNodes = _algoService.DFS(_graphService, _firstSelected);
 
-            sw.Stop(); // DURDUR
+            sw.Stop(); 
 
             DrawGraph();
 
@@ -471,7 +471,7 @@ namespace SocialNetworkAnalysis
                             $"⚡ Ticks: {sw.ElapsedTicks}");
         }
 
-        // 4. BFS (SÜRE ÖLÇÜMLÜ)
+        
         private void BtnBFS_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null)
@@ -480,11 +480,11 @@ namespace SocialNetworkAnalysis
                 return;
             }
 
-            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+            var sw = System.Diagnostics.Stopwatch.StartNew(); 
 
             var visitedNodes = _algoService.BFS(_graphService, _firstSelected);
 
-            sw.Stop(); // DURDUR
+            sw.Stop(); 
 
             DrawGraph();
 
@@ -506,16 +506,16 @@ namespace SocialNetworkAnalysis
                             $"⚡ Ticks: {sw.ElapsedTicks}");
         }
 
-        // 5. COMPONENTS (SÜRE ÖLÇÜMLÜ)
+        
         private void BtnComponents_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null) return;
 
-            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+            var sw = System.Diagnostics.Stopwatch.StartNew(); 
 
             var components = _algoService.FindConnectedComponents(_graphService);
 
-            sw.Stop(); // DURDUR
+            sw.Stop(); 
 
             foreach (var child in MainCanvas.Children)
             {
@@ -681,7 +681,7 @@ namespace SocialNetworkAnalysis
             MessageBox.Show("50 Rastgele Kullanıcı ve Bağlantılar Eklendi!\nŞimdi algoritmaların hızını test edebilirsin.");
         }
 
-        // 6. A* ALGORİTMASI (SÜRE ÖLÇÜMLÜ)
+        
         private void BtnAStar_Click(object sender, RoutedEventArgs e)
         {
             if (_graphService == null || _firstSelected == null || _secondSelected == null)
@@ -689,11 +689,11 @@ namespace SocialNetworkAnalysis
                  MessageBox.Show("Lütfen iki kişi seçin."); return;
             }
 
-            var sw = System.Diagnostics.Stopwatch.StartNew(); // BAŞLAT
+            var sw = System.Diagnostics.Stopwatch.StartNew(); 
 
             var path = _algoService.FindPathAStar(_graphService, _firstSelected, _secondSelected);
             
-            sw.Stop(); // DURDUR
+            sw.Stop(); 
 
             if (path == null) { MessageBox.Show("Yol bulunamadı."); return; }
 
